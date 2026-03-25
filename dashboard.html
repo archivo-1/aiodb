@@ -272,6 +272,27 @@
       return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png' };
     }
 
+    function resetDirArcUI() {
+      currentDirArc = null;
+      dirarcsCache = [];
+      dirarcItemsCache = [];
+      const itemsView = document.getElementById('dirarc-items-view');
+      const label = document.getElementById('current-dirarc-label');
+      const collSelect = document.getElementById('item-coleccion-select');
+      const collInput = document.getElementById('item-coleccion-input');
+
+      if (itemsView) itemsView.innerHTML = '';
+      if (label) label.textContent = 'Ningún DirArc seleccionado.';
+      if (collSelect) {
+        collSelect.innerHTML = '';
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Escribe una nueva colección…';
+        collSelect.appendChild(opt);
+      }
+      if (collInput) collInput.value = '';
+    }
+
     function setAuthUI(user) {
       const authSection = document.getElementById('auth-section');
       const dirarcSection = document.getElementById('dirarc-section');
@@ -287,15 +308,14 @@
         itemsSection.style.display = 'none';
         btnLogout.style.display = 'none';
         userInfo.textContent = '';
-        currentDirArc = null;
-        dirarcsCache = [];
-        dirarcItemsCache = [];
+        resetDirArcUI();
       } else {
         authSection.style.display = '';
         dirarcSection.style.display = '';
         itemsSection.style.display = '';
         btnLogout.style.display = '';
         userInfo.textContent = `Usuario: ${user.email || user.id}`;
+        resetDirArcUI();
         loadDirArcs();
       }
     }
@@ -387,6 +407,9 @@
 
       if (!dirarcsCache.length) {
         listEl.innerHTML = '<li class="small">No tienes ningún DirArc todavía.</li>';
+        resetDirArcUI();
+        const itemsView = document.getElementById('dirarc-items-view');
+        if (itemsView) itemsView.textContent = 'Este DirArc no tiene ítems todavía.';
         return;
       }
 
@@ -534,7 +557,6 @@
         return;
       }
 
-      // agrupar por coleccion
       const groups = {};
       dirarcItemsCache.forEach(it => {
         const key = it.coleccion || '(sin colección)';
@@ -545,7 +567,6 @@
       const keys = Object.keys(groups).sort((a,b) => a.localeCompare(b));
 
       keys.forEach(coll => {
-        // añadir al select
         if (coll !== '(sin colección)') {
           const o = document.createElement('option');
           o.value = coll;
@@ -553,7 +574,6 @@
           collSelect.appendChild(o);
         }
 
-        // render en vista
         const groupDiv = document.createElement('div');
         groupDiv.className = 'items-group';
         const title = document.createElement('div');
@@ -606,13 +626,11 @@
         return;
       }
 
-      // Generar item_id simple: DIRARC_SLUG + contador
       let baseSlug = (currentDirArc.slug || 'dirarc').replace(/[^a-zA-Z0-9_]/g, '_');
       if (!baseSlug) baseSlug = 'dirarc';
       const count = dirarcItemsCache.length || 0;
       const itemId = `${baseSlug}_${String(count + 1).padStart(3,'0')}`;
 
-      // Inferir visor, categoria, thumbnail
       const meta = inferMetaFromUrl(archivo);
       const resolvedUrl = normalizeDropboxUrl(archivo);
       const source = resolvedUrl.startsWith('http') ? 'url' : 'local';
@@ -658,7 +676,6 @@
       document.getElementById('item-archivo').value = '';
       document.getElementById('item-descripcion').value = '';
       document.getElementById('item-ui-config').value = '';
-      // no tocamos la colección por si quiere repetir la misma
 
       loadDirArcItems();
     };
@@ -667,3 +684,4 @@
   </script>
 </body>
 </html>
+
