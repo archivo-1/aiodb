@@ -14,9 +14,7 @@
       --border-soft: rgba(148,163,184,0.35);
       --text-soft: #9ca3af;
     }
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing:border-box; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       margin: 0;
@@ -27,15 +25,11 @@
       display: flex;
       flex-direction: column;
     }
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
     .small { font-size:0.8rem; color:var(--text-soft); }
     .error { color:#fca5a5; font-size:0.8rem; margin-top:0.25rem; }
     .ok { color:#bbf7d0; font-size:0.8rem; margin-top:0.25rem; }
 
-    /* Layout principal */
     header {
       height: 56px;
       min-height: 56px;
@@ -76,13 +70,12 @@
       background:rgba(15,23,42,0.9);
       border:1px solid rgba(148,163,184,0.4);
       color:var(--text-soft);
-      max-width:180px;
+      max-width:220px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-
-    button, .btn-link {
+    button {
       font-size:0.8rem;
       border-radius:6px;
       border:1px solid rgba(148,163,184,0.5);
@@ -102,6 +95,10 @@
     button.secondary {
       background:#020617;
     }
+    button.icon {
+      padding:0.25rem 0.4rem;
+      font-size:0.75rem;
+    }
     button:disabled {
       opacity:0.6;
       cursor:default;
@@ -118,7 +115,7 @@
       gap:1rem;
     }
 
-    /* Auth panel */
+    /* Auth */
     #auth-section {
       background:rgba(15,23,42,0.95);
       border-radius:10px;
@@ -128,7 +125,6 @@
     }
     .row { display:flex; gap:0.75rem; flex-wrap:wrap; }
     .row > div { flex:1; min-width: 260px; }
-
     label {
       display:block;
       margin: .35rem 0;
@@ -146,7 +142,7 @@
     }
     textarea { resize: vertical; }
 
-    /* Layout de DirArcs + Contenedores */
+    /* Layout principal */
     #app-shell {
       display:flex;
       gap:1rem;
@@ -154,7 +150,7 @@
     }
     #dirarc-column {
       width:32%;
-      min-width:250px;
+      min-width:260px;
       background:rgba(15,23,42,0.95);
       border-radius:10px;
       border:1px solid var(--border-soft);
@@ -172,7 +168,6 @@
       display:flex;
       flex-direction:column;
     }
-
     #dirarc-header {
       display:flex;
       align-items:center;
@@ -183,7 +178,6 @@
       margin:0;
       font-size:0.9rem;
     }
-
     ul.dirarc-list {
       list-style:none;
       padding-left:0;
@@ -244,6 +238,10 @@
       border:1px solid rgba(148,163,184,0.45);
       font-size:0.68rem;
     }
+    .dirarc-actions {
+      display:flex;
+      gap:0.2rem;
+    }
 
     #items-header {
       display:flex;
@@ -286,13 +284,50 @@
       justify-content:space-between;
       align-items:center;
       padding:0.25rem 0;
+      gap:0.35rem;
     }
-    .items-group-item span {
-      flex:1;
+    .item-main {
+      display:flex;
+      align-items:center;
+      gap:0.35rem;
       min-width:0;
+      flex:1;
+    }
+    .item-icon {
+      width:18px;
+      height:18px;
+      border-radius:4px;
+      background:rgba(15,23,42,0.9);
+      border:1px solid rgba(148,163,184,0.5);
+      font-size:0.65rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--text-soft);
+      flex-shrink:0;
+    }
+    .item-text {
+      display:flex;
+      flex-direction:column;
+      gap:1px;
+      min-width:0;
+    }
+    .item-name {
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+    }
+    .item-url {
+      font-size:0.7rem;
+      color:var(--text-soft);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .item-actions {
+      display:flex;
+      gap:0.2rem;
+      flex-shrink:0;
     }
 
     /* Side panels */
@@ -304,9 +339,8 @@
       display:none;
       z-index:40;
     }
-    .side-panel-overlay.open {
-      display:block;
-    }
+    .side-panel-overlay.open { display:block; }
+
     .side-panel {
       position:fixed;
       top:0;
@@ -324,9 +358,7 @@
       transition:right 0.25s ease-out;
       z-index:50;
     }
-    .side-panel.open {
-      right:0;
-    }
+    .side-panel.open { right:0; }
     .side-panel-header {
       display:flex;
       align-items:center;
@@ -380,18 +412,18 @@
   <header>
     <div class="header-title">
       <h1>Aio Repo – DirArc Dashboard</h1>
-      <span>Gestiona tus DirArcs y contenedores para ArchVista</span>
+      <span>Gestiona tus Aio Repo y contenedores para ArchVista</span>
     </div>
     <div class="header-right">
       <div id="user-info" class="badge-user" style="display:none;"></div>
       <button id="btn-open-create-item-panel" class="secondary" style="display:none;">+ Contenedor</button>
-      <button id="btn-open-create-dirarc-panel" class="primary">+ DirArc</button>
+      <button id="btn-open-create-dirarc-panel" class="primary">+ Aio Repo</button>
       <button id="btn-logout" class="secondary" style="display:none;">Cerrar sesión</button>
     </div>
   </header>
 
   <main>
-    <!-- Auth -->
+    <!-- Auth (solo se ve si no hay sesión) -->
     <section id="auth-section">
       <h2 style="margin-top:0;">Acceso</h2>
       <div class="row">
@@ -409,7 +441,7 @@
         </div>
         <div>
           <h3>Login</h3>
-          <p class="small">Si ya tienes cuenta, inicia sesión para ver tus DirArc.</p>
+          <p class="small">Si ya tienes cuenta, inicia sesión para ver tus Aio Repo.</p>
           <label>Email
             <input id="login-email" type="email" />
           </label>
@@ -424,12 +456,12 @@
 
     <!-- Shell DirArcs + Contenedores -->
     <div id="app-shell" style="display:none;">
-      <!-- Columna DirArcs -->
+      <!-- Columna Aio Repo (DirArc) -->
       <section id="dirarc-column">
         <div id="dirarc-header">
           <div>
-            <h2>Mis DirArcs</h2>
-            <div class="small" id="dirarc-subtitle">Selecciona un DirArc para gestionar sus contenedores.</div>
+            <h2>Mis Aio Repo</h2>
+            <div class="small" id="dirarc-subtitle">Selecciona un Aio Repo para gestionar sus contenedores.</div>
           </div>
         </div>
         <ul id="dirarc-list" class="dirarc-list"></ul>
@@ -441,11 +473,11 @@
         <div id="items-header">
           <div>
             <h2>Contenedores</h2>
-            <div id="current-dirarc-label" class="small">Ningún DirArc seleccionado.</div>
+            <div id="current-dirarc-label" class="small">Ningún Aio Repo seleccionado.</div>
           </div>
         </div>
         <div id="dirarc-items-view" class="small">
-          Inicia sesión y selecciona un DirArc en la columna izquierda.
+          Inicia sesión y selecciona un Aio Repo en la columna izquierda.
         </div>
         <p class="small" style="margin-top:0.75rem;">
           Endpoint global de contenido:<br />
@@ -455,28 +487,29 @@
     </div>
   </main>
 
-  <!-- Overlay + Panel Crear DirArc -->
+  <!-- Overlay para paneles -->
   <div id="panel-overlay" class="side-panel-overlay"></div>
 
+  <!-- Panel Crear/Editar Aio Repo -->
   <div id="panel-create-dirarc" class="side-panel">
     <div class="side-panel-header">
-      <h3>Nuevo DirArc</h3>
-      <button id="btn-close-create-dirarc" class="secondary">Cerrar</button>
+      <h3 id="dirarc-panel-title">Nuevo Aio Repo</h3>
+      <button id="btn-close-create-dirarc" class="secondary icon">✕</button>
     </div>
     <div class="side-panel-body">
       <p class="small">
-        Un DirArc es un “content.json virtual” que agrupa tus contenedores en colecciones.
-        Luego podrás compartir cada DirArc con tus clientes.
+        Un Aio Repo es un “content.json virtual” que agrupa tus contenedores en colecciones.
+        Luego lo verás en ArchVista con los visores.
       </p>
-      <label>Slug (para URL, sin espacios)
+      <label>Nombre del Aio Repo
+        <input id="dirarc-title" placeholder="Casa Herrera – Fase 2" />
+      </label>
+      <label>Identificador de Aio Repo (para URL, sin espacios)
         <input id="dirarc-slug" placeholder="casa-herrera-fase-2" />
       </label>
       <div id="slug-preview" class="small">
-        URL: <code>index.html?slugDirArc=…</code>
+        Enlace de Aio Repo: <code>index.html?slugDirArc=…</code>
       </div>
-      <label>Título
-        <input id="dirarc-title" placeholder="Casa Herrera – Fase 2" />
-      </label>
       <label>Descripción
         <textarea id="dirarc-desc" rows="2" placeholder="Colección de contenedores para este proyecto."></textarea>
       </label>
@@ -484,40 +517,40 @@
     </div>
     <div class="side-panel-footer">
       <button id="btn-cancel-dirarc" class="secondary">Cancelar</button>
-      <button id="btn-create-dirarc" class="primary">Crear DirArc</button>
+      <button id="btn-save-dirarc" class="primary">Guardar Aio Repo</button>
     </div>
   </div>
 
-  <!-- Panel Crear Contenedor -->
+  <!-- Panel Crear/Editar Contenedor -->
   <div id="panel-create-item" class="side-panel">
     <div class="side-panel-header">
-      <h3>Nuevo contenedor</h3>
-      <button id="btn-close-create-item" class="secondary">Cerrar</button>
+      <h3 id="item-panel-title">Nuevo contenedor</h3>
+      <button id="btn-close-create-item" class="secondary icon">✕</button>
     </div>
     <div class="side-panel-body">
       <p class="small">
         Cada contenedor corresponde a una URL (archivo o enlace) más metadatos.
-        ArchVista decidirá el visor adecuado según el tipo.
+        ArchVista decide el visor según el tipo.
       </p>
 
       <label>Nombre visible
         <input id="item-nombre" placeholder="Modelo IFC – Cliente X" />
       </label>
 
-      <label>Colección dentro del DirArc
+      <label>Colección dentro del Aio Repo
         <select id="item-coleccion-select">
           <option value="">Escribe una nueva colección…</option>
         </select>
         <input id="item-coleccion-input" placeholder="Casa Herrera – Fase 2" />
         <span class="small">
-          Puedes reutilizar colecciones existentes del DirArc o escribir una nueva.
+          Puedes reutilizar colecciones existentes o escribir una nueva.
         </span>
       </label>
 
       <label>Archivo o enlace (URL pública)
         <input id="item-archivo" placeholder="https://www.dropbox.com/..." />
         <span class="small">
-          Pega un enlace público (Dropbox, Drive, YouTube, Vimeo, GeoJSON, sitio web, etc.).
+          Enlace público (Dropbox, Drive, YouTube, Vimeo, GeoJSON, sitio web, etc.).
         </span>
       </label>
 
@@ -529,8 +562,8 @@
           </label>
         </div>
         <div class="small">
-          Activado → categoría <code>enlace</code> (iframe).<br>
-          Desactivado → <code>enlaceEXT</code> (tarjeta, abrir en nueva pestaña).
+          Activado → <code>enlace</code> (iframe).<br>
+          Desactivado → <code>enlaceEXT</code> (tarjeta, nueva pestaña).
         </div>
       </div>
 
@@ -548,7 +581,7 @@
     </div>
     <div class="side-panel-footer">
       <button id="btn-cancel-item" class="secondary">Cancelar</button>
-      <button id="btn-add-item" class="primary">Crear contenedor</button>
+      <button id="btn-save-item" class="primary">Guardar contenedor</button>
     </div>
   </div>
 
@@ -565,7 +598,10 @@
   let dirarcsCache = [];
   let dirarcItemsCache = [];
 
-  // ----------------------- Utilidades URL / tipo -----------------------
+  let editingDirArc = null;   // objeto dirarc o null
+  let editingItem = null;     // objeto item o null
+
+  // ---------- Utilidades URL / tipo ----------
   function normalizeExternalUrl(original) {
     try {
       const url = new URL(original);
@@ -613,33 +649,33 @@
     const lower = safe.toLowerCase();
 
     if (lower.endsWith('.pdf')) {
-      return { visor: 'media', categoria: 'pdf', thumbnail: 'thumbnails/gt_pdf.png' };
+      return { visor: 'media', categoria: 'pdf', thumbnail: 'thumbnails/gt_pdf.png', icon: 'P' };
     }
     if (lower.endsWith('.ifc')) {
-      return { visor: 'ifc', categoria: 'modelo-BIM', thumbnail: 'thumbnails/gt_ifc.png' };
+      return { visor: 'ifc', categoria: 'modelo-BIM', thumbnail: 'thumbnails/gt_ifc.png', icon: 'I' };
     }
     if (lower.endsWith('.3dm')) {
-      return { visor: '3dm', categoria: 'modelo-3d', thumbnail: 'thumbnails/gt_3dm.png' };
+      return { visor: '3dm', categoria: 'modelo-3d', thumbnail: 'thumbnails/gt_3dm.png', icon: '3' };
     }
     if (lower.endsWith('.dxf')) {
-      return { visor: 'dxf', categoria: 'plano-2d', thumbnail: 'thumbnails/gt_dxf.png' };
+      return { visor: 'dxf', categoria: 'plano-2d', thumbnail: 'thumbnails/gt_dxf.png', icon: 'D' };
     }
     if (lower.endsWith('.glb')) {
-      return { visor: 'glb', categoria: 'modelo-3d', thumbnail: 'thumbnails/gt_glb.png' };
+      return { visor: 'glb', categoria: 'modelo-3d', thumbnail: 'thumbnails/gt_glb.png', icon: 'G' };
     }
     if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp')) {
-      return { visor: 'media', categoria: 'imagen', thumbnail: 'thumbnails/gt_img.png' };
+      return { visor: 'media', categoria: 'imagen', thumbnail: 'thumbnails/gt_img.png', icon: 'IMG' };
     }
     if (lower.endsWith('.mp4') || lower.endsWith('.webm')) {
-      return { visor: 'media', categoria: 'video', thumbnail: 'thumbnails/gt_mp4.png' };
+      return { visor: 'media', categoria: 'video', thumbnail: 'thumbnails/gt_mp4.png', icon: 'V' };
     }
     if (lower.endsWith('.mp3') || lower.endsWith('.wav') || lower.endsWith('.ogg')) {
-      return { visor: 'media', categoria: 'audio', thumbnail: 'thumbnails/gt_audio.png' };
+      return { visor: 'media', categoria: 'audio', thumbnail: 'thumbnails/gt_audio.png', icon: 'A' };
     }
     if (lower.endsWith('.geojson') || lower.endsWith('.json')) {
-      return { visor: 'map', categoria: 'mapa', thumbnail: 'thumbnails/gt_map.png' };
+      return { visor: 'map', categoria: 'mapa', thumbnail: 'thumbnails/gt_map.png', icon: 'M' };
     }
-    return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png' };
+    return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png', icon: '●' };
   }
 
   function classifyUrlForMedia(originalUrl, useIframeFlag) {
@@ -649,7 +685,8 @@
       return {
         visor: 'media',
         categoria: 'yt/vm',
-        thumbnail: 'thumbnails/gt_mp4.png'
+        thumbnail: 'thumbnails/gt_mp4.png',
+        icon: 'V'
       };
     }
 
@@ -658,17 +695,17 @@
     }
 
     if (/^https?:\/\//i.test(url) === false) {
-      return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png' };
+      return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png', icon: '●' };
     }
 
     if (useIframeFlag) {
-      return { visor: 'media', categoria: 'enlace', thumbnail: 'thumbnails/gt_0.png' };
+      return { visor: 'media', categoria: 'enlace', thumbnail: 'thumbnails/gt_0.png', icon: '↗' };
     } else {
-      return { visor: 'media', categoria: 'enlaceEXT', thumbnail: 'thumbnails/gt_0.png' };
+      return { visor: 'media', categoria: 'enlaceEXT', thumbnail: 'thumbnails/gt_0.png', icon: '↗' };
     }
   }
 
-  // ----------------------- UI helpers -----------------------
+  // ---------- Helpers UI ----------
   function resetDirArcUI() {
     currentDirArc = null;
     dirarcItemsCache = [];
@@ -677,8 +714,8 @@
     const collSelect = document.getElementById('item-coleccion-select');
     const collInput = document.getElementById('item-coleccion-input');
 
-    if (itemsView) itemsView.textContent = 'Selecciona un DirArc para ver sus contenedores.';
-    if (label) label.textContent = 'Ningún DirArc seleccionado.';
+    if (itemsView) itemsView.textContent = 'Selecciona un Aio Repo para ver sus contenedores.';
+    if (label) label.textContent = 'Ningún Aio Repo seleccionado.';
     if (collSelect) {
       collSelect.innerHTML = '';
       const opt = document.createElement('option');
@@ -706,7 +743,7 @@
       newItemBtn.style.display = 'none';
       resetDirArcUI();
     } else {
-      authSection.style.display = '';
+      authSection.style.display = 'none'; // se oculta al tener sesión
       appShell.style.display = 'flex';
       btnLogout.style.display = '';
       userInfo.style.display = 'inline-flex';
@@ -726,7 +763,7 @@
     setAuthUI(data.user || null);
   }
 
-  // ----------------------- Auth -----------------------
+  // ---------- Auth ----------
   document.getElementById('btn-signup').onclick = async () => {
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value.trim();
@@ -773,11 +810,12 @@
   document.getElementById('btn-logout').onclick = async () => {
     await supabase.auth.signOut();
     setAuthUI(null);
-    document.getElementById('login-result').textContent = 'Sesión cerrada.';
-    document.getElementById('login-result').className = 'small ok';
+    const lr = document.getElementById('login-result');
+    lr.textContent = 'Sesión cerrada.';
+    lr.className = 'small ok';
   };
 
-  // ----------------------- DirArcs -----------------------
+  // ---------- DirArcs (Aio Repo) ----------
   async function loadDirArcs() {
     const listEl = document.getElementById('dirarc-list');
     const resultEl = document.getElementById('dirarc-list-result');
@@ -795,7 +833,7 @@
 
     if (error) {
       console.error(error);
-      resultEl.textContent = 'Error cargando DirArc: ' + error.message;
+      resultEl.textContent = 'Error cargando Aio Repo: ' + error.message;
       resultEl.className = 'small error';
       return;
     }
@@ -803,7 +841,7 @@
     dirarcsCache = data || [];
 
     if (!dirarcsCache.length) {
-      listEl.innerHTML = '<li class="small">No tienes ningún DirArc todavía. Usa el botón “+ DirArc” para crear el primero.</li>';
+      listEl.innerHTML = '<li class="small">No tienes ningún Aio Repo todavía. Usa “+ Aio Repo”.</li>';
       resetDirArcUI();
       newItemBtn.style.display = 'none';
       return;
@@ -827,30 +865,58 @@
     listEl.innerHTML = '';
 
     if (!dirarcsCache.length) {
-      listEl.innerHTML = '<li class="small">No tienes ningún DirArc todavía.</li>';
+      listEl.innerHTML = '<li class="small">No tienes ningún Aio Repo todavía.</li>';
       return;
     }
 
     dirarcsCache.forEach(d => {
       const li = document.createElement('li');
+
       const main = document.createElement('div');
       main.className = 'dirarc-main';
 
       const titleSpan = document.createElement('div');
       titleSpan.className = 'dirarc-title';
-      titleSpan.textContent = d.title;
+      titleSpan.textContent = d.title || d.slug;
 
-      const countSpan = document.createElement('div');
-      countSpan.className = 'chip-count';
-      const count = d.items_count ?? ''; // opcional si luego agregas un campo
-      countSpan.textContent = count ? `${count} cont.` : '';
+      const actions = document.createElement('div');
+      actions.className = 'dirarc-actions';
+
+      const btnVisit = document.createElement('button');
+      btnVisit.className = 'icon secondary';
+      btnVisit.title = 'Abrir Aio Repo';
+      btnVisit.textContent = '↗';
+
+      const btnCopy = document.createElement('button');
+      btnCopy.className = 'icon secondary';
+      btnCopy.title = 'Copiar enlace';
+      btnCopy.textContent = '⧉';
+
+      const btnEdit = document.createElement('button');
+      btnEdit.className = 'icon secondary';
+      btnEdit.title = 'Editar';
+      btnEdit.textContent = '✎';
+
+      actions.appendChild(btnVisit);
+      actions.appendChild(btnCopy);
+      actions.appendChild(btnEdit);
 
       main.appendChild(titleSpan);
-      main.appendChild(countSpan);
+      main.appendChild(actions);
 
       const meta = document.createElement('div');
       meta.className = 'dirarc-meta';
-      meta.innerHTML = `<span class="dirarc-slug">${d.slug}</span>`;
+      const slugSpan = document.createElement('span');
+      slugSpan.className = 'dirarc-slug';
+      slugSpan.textContent = `Aio Repo: ${d.slug}`;
+
+      const countSpan = document.createElement('span');
+      countSpan.className = 'chip-count';
+      const count = d.items_count ?? '';
+      countSpan.textContent = count ? `${count} cont.` : '';
+
+      meta.appendChild(slugSpan);
+      meta.appendChild(countSpan);
 
       li.appendChild(main);
       li.appendChild(meta);
@@ -865,6 +931,27 @@
       if (currentDirArc && currentDirArc.id === d.id) {
         li.classList.add('active');
       }
+
+      // evitar que los botones cambien la selección
+      btnVisit.onclick = ev => {
+        ev.stopPropagation();
+        const url = `index.html?slugDirArc=${encodeURIComponent(d.slug)}`;
+        window.open(url, '_blank');
+      };
+      btnCopy.onclick = async ev => {
+        ev.stopPropagation();
+        const url = `index.html?slugDirArc=${encodeURIComponent(d.slug)}`;
+        try {
+          await navigator.clipboard.writeText(url); // [web:424][web:425]
+        } catch (err) {
+          console.warn('No se pudo copiar al portapapeles', err);
+        }
+      };
+      btnEdit.onclick = ev => {
+        ev.stopPropagation();
+        openDirArcEditor(d);
+      };
+
       listEl.appendChild(li);
     });
   }
@@ -872,18 +959,18 @@
   function renderCurrentDirArcLabel() {
     const label = document.getElementById('current-dirarc-label');
     if (!currentDirArc) {
-      label.textContent = 'Ningún DirArc seleccionado.';
+      label.textContent = 'Ningún Aio Repo seleccionado.';
     } else {
-      label.textContent = `DirArc activo: ${currentDirArc.title} (slug: ${currentDirArc.slug})`;
+      label.textContent = `Aio Repo activo: ${currentDirArc.title || currentDirArc.slug} (id: ${currentDirArc.slug})`;
     }
   }
 
-  async function createDirArc() {
+  async function saveDirArc() {
     const slugEl = document.getElementById('dirarc-slug');
     const titleEl = document.getElementById('dirarc-title');
     const descEl = document.getElementById('dirarc-desc');
     const resultEl = document.getElementById('dirarc-create-result');
-    const btn = document.getElementById('btn-create-dirarc');
+    const btn = document.getElementById('btn-save-dirarc');
 
     const slug = slugEl.value.trim();
     const title = titleEl.value.trim();
@@ -895,38 +982,57 @@
       return;
     }
     if (!slug || !title) {
-      resultEl.textContent = 'Slug y título son obligatorios.';
+      resultEl.textContent = 'Nombre e identificador son obligatorios.';
       resultEl.className = 'small error';
       return;
     }
 
     btn.disabled = true;
-    resultEl.textContent = 'Creando DirArc...';
+    resultEl.textContent = editingDirArc ? 'Actualizando Aio Repo...' : 'Creando Aio Repo...';
     resultEl.className = 'small';
 
-    const { data, error } = await supabase
-      .from('dirarcs')
-      .insert({
-        owner_user_id: currentUser.id,
-        slug,
-        title,
-        description,
-        public: false
-      })
-      .select()
-      .single();
+    let error;
+    let data;
+
+    if (editingDirArc) {
+      const resp = await supabase
+        .from('dirarcs')
+        .update({ slug, title, description })
+        .eq('id', editingDirArc.id)
+        .select()
+        .single();
+      error = resp.error;
+      data = resp.data;
+    } else {
+      const resp = await supabase
+        .from('dirarcs')
+        .insert({
+          owner_user_id: currentUser.id,
+          slug,
+          title,
+          description,
+          public: false
+        })
+        .select()
+        .single();
+      error = resp.error;
+      data = resp.data;
+    }
 
     btn.disabled = false;
 
     if (error) {
       console.error(error);
-      resultEl.textContent = 'Error creando DirArc: ' + error.message;
+      resultEl.textContent = 'Error guardando Aio Repo: ' + error.message;
       resultEl.className = 'small error';
       return;
     }
 
-    resultEl.textContent = 'DirArc creado.';
+    resultEl.textContent = 'Aio Repo guardado.';
     resultEl.className = 'small ok';
+
+    editingDirArc = null;
+    document.getElementById('dirarc-panel-title').textContent = 'Nuevo Aio Repo';
 
     slugEl.value = '';
     titleEl.value = '';
@@ -938,7 +1044,18 @@
     closePanel('dirarc');
   }
 
-  // ----------------------- Contenedores (items) -----------------------
+  function openDirArcEditor(dirarc) {
+    editingDirArc = dirarc;
+    document.getElementById('dirarc-panel-title').textContent = 'Editar Aio Repo';
+    document.getElementById('dirarc-title').value = dirarc.title || '';
+    document.getElementById('dirarc-slug').value = dirarc.slug || '';
+    document.getElementById('dirarc-desc').value = dirarc.description || '';
+    updateSlugPreview();
+    document.getElementById('dirarc-create-result').textContent = '';
+    openPanel('dirarc');
+  }
+
+  // ---------- Contenedores ----------
   async function loadDirArcItems() {
     const viewEl = document.getElementById('dirarc-items-view');
     const collSelect = document.getElementById('item-coleccion-select');
@@ -951,7 +1068,7 @@
     collSelect.appendChild(opt);
 
     if (!currentDirArc) {
-      viewEl.textContent = 'Selecciona un DirArc para ver sus contenedores.';
+      viewEl.textContent = 'Selecciona un Aio Repo para ver sus contenedores.';
       return;
     }
 
@@ -964,14 +1081,14 @@
 
     if (error) {
       console.error(error);
-      viewEl.textContent = 'Error cargando contenedores del DirArc: ' + error.message;
+      viewEl.textContent = 'Error cargando contenedores: ' + error.message;
       return;
     }
 
     dirarcItemsCache = data || [];
 
     if (!dirarcItemsCache.length) {
-      viewEl.textContent = 'Este DirArc no tiene contenedores todavía. Usa “+ Contenedor” para añadir uno.';
+      viewEl.textContent = 'Este Aio Repo no tiene contenedores todavía. Usa “+ Contenedor”.';
       return;
     }
 
@@ -1003,16 +1120,89 @@
         const line = document.createElement('div');
         line.className = 'items-group-item';
 
-        const label = document.createElement('span');
-        label.textContent = `• ${it.item_id} — ${it.nombre}  [visor: ${it.visor}, categoría: ${it.categoria}]`;
+        const main = document.createElement('div');
+        main.className = 'item-main';
 
-        const btn = document.createElement('button');
-        btn.textContent = 'Borrar';
-        btn.className = 'secondary';
-        btn.style.marginLeft = '0.5rem';
+        const meta = inferMetaFromUrl(it.archivo || it.resolved_url || '');
+        const icon = document.createElement('div');
+        icon.className = 'item-icon';
+        icon.textContent = (meta.icon || '●');
 
-        btn.onclick = async (e) => {
-          e.stopPropagation();
+        const textWrap = document.createElement('div');
+        textWrap.className = 'item-text';
+
+        const nameSpan = document.createElement('div');
+        nameSpan.className = 'item-name';
+        nameSpan.textContent = it.nombre || it.item_id;
+
+        const urlSpan = document.createElement('div');
+        urlSpan.className = 'item-url';
+        urlSpan.textContent = it.archivo;
+
+        textWrap.appendChild(nameSpan);
+        textWrap.appendChild(urlSpan);
+
+        main.appendChild(icon);
+        main.appendChild(textWrap);
+
+        const actions = document.createElement('div');
+        actions.className = 'item-actions';
+
+        const btnVisit = document.createElement('button');
+        btnVisit.className = 'icon secondary';
+        btnVisit.title = 'Abrir en visor';
+        btnVisit.textContent = '↗';
+
+        const btnCopy = document.createElement('button');
+        btnCopy.className = 'icon secondary';
+        btnCopy.title = 'Copiar enlace visor';
+        btnCopy.textContent = '⧉';
+
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'icon secondary';
+        btnEdit.title = 'Editar contenedor';
+        btnEdit.textContent = '✎';
+
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'icon secondary';
+        btnDelete.title = 'Borrar';
+        btnDelete.textContent = '🗑';
+
+        actions.appendChild(btnVisit);
+        actions.appendChild(btnCopy);
+        actions.appendChild(btnEdit);
+        actions.appendChild(btnDelete);
+
+        // acciones
+        btnVisit.onclick = ev => {
+          ev.stopPropagation();
+          const slugParam = currentDirArc.slug;
+          const extra = slugParam ? `&slugDirArc=${encodeURIComponent(slugParam)}` : '';
+          const visor = it.visor || 'media';
+          const url = `viewer-${visor}.html?id=${encodeURIComponent(it.item_id)}${extra}`;
+          window.open(url, '_blank');
+        };
+
+        btnCopy.onclick = async ev => {
+          ev.stopPropagation();
+          const slugParam = currentDirArc.slug;
+          const extra = slugParam ? `&slugDirArc=${encodeURIComponent(slugParam)}` : '';
+          const visor = it.visor || 'media';
+          const url = `viewer-${visor}.html?id=${encodeURIComponent(it.item_id)}${extra}`;
+          try {
+            await navigator.clipboard.writeText(url); // [web:424][web:434]
+          } catch (err) {
+            console.warn('No se pudo copiar enlace', err);
+          }
+        };
+
+        btnEdit.onclick = ev => {
+          ev.stopPropagation();
+          openItemEditor(it);
+        };
+
+        btnDelete.onclick = async ev => {
+          ev.stopPropagation();
           const ok = confirm(`¿Borrar el contenedor ${it.item_id}?`);
           if (!ok) return;
 
@@ -1030,8 +1220,8 @@
           await loadDirArcItems();
         };
 
-        line.appendChild(label);
-        line.appendChild(btn);
+        line.appendChild(main);
+        line.appendChild(actions);
         groupDiv.appendChild(line);
       });
 
@@ -1072,18 +1262,14 @@
     typePreviewEl.textContent = `Se detectará como visor “${meta.visor}” y categoría “${meta.categoria}”.`;
   }
 
-  archivoInputEl.addEventListener('input', () => {
-    updateTypePreview();
-  });
-  useIframeEl.addEventListener('change', () => {
-    updateTypePreview();
-  });
+  archivoInputEl.addEventListener('input', updateTypePreview);
+  useIframeEl.addEventListener('change', updateTypePreview);
 
-  async function createItem() {
+  async function saveItem() {
     const resultEl = document.getElementById('item-result');
 
     if (!currentUser || !currentDirArc) {
-      resultEl.textContent = 'Debes iniciar sesión y seleccionar un DirArc primero.';
+      resultEl.textContent = 'Debes iniciar sesión y seleccionar un Aio Repo primero.';
       resultEl.className = 'small error';
       return;
     }
@@ -1094,7 +1280,7 @@
     const descripcion = document.getElementById('item-descripcion').value.trim();
     const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
     const useIframe = document.getElementById('item-use-iframe').checked;
-    const btn = document.getElementById('btn-add-item');
+    const btn = document.getElementById('btn-save-item');
 
     if (!nombre || !coleccion || !archivo) {
       resultEl.textContent = 'Nombre, colección y archivo/enlace son obligatorios.';
@@ -1102,10 +1288,15 @@
       return;
     }
 
-    let baseSlug = (currentDirArc.slug || 'dirarc').replace(/[^a-zA-Z0-9_]/g, '_');
-    if (!baseSlug) baseSlug = 'dirarc';
-    const count = dirarcItemsCache.length || 0;
-    const itemId = `${baseSlug}_${String(count + 1).padStart(3, '0')}`;
+    let itemId;
+    if (editingItem) {
+      itemId = editingItem.item_id;
+    } else {
+      let baseSlug = (currentDirArc.slug || 'dirarc').replace(/[^a-zA-Z0-9_]/g, '_');
+      if (!baseSlug) baseSlug = 'dirarc';
+      const count = dirarcItemsCache.length || 0;
+      itemId = `${baseSlug}_${String(count + 1).padStart(3, '0')}`;
+    }
 
     const meta = classifyUrlForMedia(archivo, useIframe);
     const resolvedUrl = normalizeExternalUrl(archivo);
@@ -1123,36 +1314,58 @@
     }
 
     btn.disabled = true;
-    resultEl.textContent = 'Creando contenedor...';
+    resultEl.textContent = editingItem ? 'Actualizando contenedor...' : 'Creando contenedor...';
     resultEl.className = 'small';
 
-    const { error } = await supabase.from('items').insert({
-      dirarc_id: currentDirArc.id,
-      item_id: itemId,
-      nombre,
-      visor: meta.visor,
-      categoria: meta.categoria,
-      coleccion,
-      source,
-      archivo,
-      resolved_url: resolvedUrl,
-      descripcion,
-      tamano: null,
-      thumbnail: meta.thumbnail,
-      ui_config: uiConfig
-    });
+    let error;
+    if (editingItem) {
+      const resp = await supabase.from('items')
+        .update({
+          nombre,
+          coleccion,
+          archivo,
+          resolved_url: resolvedUrl,
+          descripcion,
+          visor: meta.visor,
+          categoria: meta.categoria,
+          thumbnail: meta.thumbnail,
+          ui_config: uiConfig
+        })
+        .eq('item_id', editingItem.item_id);
+      error = resp.error;
+    } else {
+      const resp = await supabase.from('items').insert({
+        dirarc_id: currentDirArc.id,
+        item_id: itemId,
+        nombre,
+        visor: meta.visor,
+        categoria: meta.categoria,
+        coleccion,
+        source,
+        archivo,
+        resolved_url: resolvedUrl,
+        descripcion,
+        tamano: null,
+        thumbnail: meta.thumbnail,
+        ui_config: uiConfig
+      });
+      error = resp.error;
+    }
 
     btn.disabled = false;
 
     if (error) {
       console.error(error);
-      resultEl.textContent = 'Error insertando contenedor: ' + error.message;
+      resultEl.textContent = 'Error guardando contenedor: ' + error.message;
       resultEl.className = 'small error';
       return;
     }
 
-    resultEl.textContent = 'Contenedor creado correctamente en el DirArc.';
+    resultEl.textContent = 'Contenedor guardado.';
     resultEl.className = 'small ok';
+
+    editingItem = null;
+    document.getElementById('item-panel-title').textContent = 'Nuevo contenedor';
 
     document.getElementById('item-nombre').value = '';
     document.getElementById('item-archivo').value = '';
@@ -1166,7 +1379,21 @@
     closePanel('item');
   }
 
-  // ----------------------- Paneles laterales -----------------------
+  function openItemEditor(item) {
+    editingItem = item;
+    document.getElementById('item-panel-title').textContent = 'Editar contenedor';
+    document.getElementById('item-nombre').value = item.nombre || '';
+    document.getElementById('item-coleccion-input').value = item.coleccion || '';
+    document.getElementById('item-archivo').value = item.archivo || '';
+    document.getElementById('item-descripcion').value = item.descripcion || '';
+    document.getElementById('item-ui-config').value = item.ui_config ? JSON.stringify(item.ui_config, null, 2) : '';
+    document.getElementById('item-use-iframe').checked = item.categoria === 'enlace';
+    updateTypePreview();
+    document.getElementById('item-result').textContent = '';
+    openPanel('item');
+  }
+
+  // ---------- Paneles laterales ----------
   const overlayEl = document.getElementById('panel-overlay');
   const panelDirArcEl = document.getElementById('panel-create-dirarc');
   const panelItemEl = document.getElementById('panel-create-item');
@@ -1178,26 +1405,52 @@
     } else if (type === 'item') {
       if (!currentDirArc) return;
       panelItemEl.classList.add('open');
-      document.getElementById('item-result').textContent = '';
     }
   }
 
   function closePanel(type) {
     if (type === 'dirarc') {
       panelDirArcEl.classList.remove('open');
+      editingDirArc = null;
+      document.getElementById('dirarc-panel-title').textContent = 'Nuevo Aio Repo';
+      document.getElementById('dirarc-create-result').textContent = '';
     } else if (type === 'item') {
       panelItemEl.classList.remove('open');
+      editingItem = null;
+      document.getElementById('item-panel-title').textContent = 'Nuevo contenedor';
+      document.getElementById('item-result').textContent = '';
     }
     if (!panelDirArcEl.classList.contains('open') && !panelItemEl.classList.contains('open')) {
       overlayEl.classList.remove('open');
     }
   }
 
-  document.getElementById('btn-open-create-dirarc-panel').onclick = () => openPanel('dirarc');
+  document.getElementById('btn-open-create-dirarc-panel').onclick = () => {
+    editingDirArc = null;
+    document.getElementById('dirarc-panel-title').textContent = 'Nuevo Aio Repo';
+    document.getElementById('dirarc-title').value = '';
+    document.getElementById('dirarc-slug').value = '';
+    document.getElementById('dirarc-desc').value = '';
+    updateSlugPreview();
+    document.getElementById('dirarc-create-result').textContent = '';
+    openPanel('dirarc');
+  };
   document.getElementById('btn-close-create-dirarc').onclick = () => closePanel('dirarc');
   document.getElementById('btn-cancel-dirarc').onclick = () => closePanel('dirarc');
 
-  document.getElementById('btn-open-create-item-panel').onclick = () => openPanel('item');
+  document.getElementById('btn-open-create-item-panel').onclick = () => {
+    editingItem = null;
+    document.getElementById('item-panel-title').textContent = 'Nuevo contenedor';
+    document.getElementById('item-nombre').value = '';
+    document.getElementById('item-coleccion-input').value = '';
+    document.getElementById('item-archivo').value = '';
+    document.getElementById('item-descripcion').value = '';
+    document.getElementById('item-ui-config').value = '';
+    document.getElementById('item-use-iframe').checked = false;
+    iframeOptionsEl.style.display = 'none';
+    typePreviewEl.textContent = '';
+    openPanel('item');
+  };
   document.getElementById('btn-close-create-item').onclick = () => closePanel('item');
   document.getElementById('btn-cancel-item').onclick = () => closePanel('item');
 
@@ -1206,24 +1459,25 @@
     closePanel('item');
   };
 
-  document.getElementById('btn-create-dirarc').onclick = createDirArc;
-  document.getElementById('btn-add-item').onclick = createItem;
+  document.getElementById('btn-save-dirarc').onclick = saveDirArc;
+  document.getElementById('btn-save-item').onclick = saveItem;
 
-  // preview slug
+  // preview identificador
   const slugEl = document.getElementById('dirarc-slug');
   const slugPreviewEl = document.getElementById('slug-preview');
-  slugEl.addEventListener('input', () => {
+  function updateSlugPreview() {
     const raw = slugEl.value.trim();
     const safe = raw.replace(/[^a-zA-Z0-9\-]/g, '-');
     if (raw !== safe) {
       slugEl.value = safe;
     }
     if (!safe) {
-      slugPreviewEl.innerHTML = 'URL: <code>index.html?slugDirArc=…</code>';
+      slugPreviewEl.innerHTML = 'Enlace de Aio Repo: <code>index.html?slugDirArc=…</code>';
     } else {
-      slugPreviewEl.innerHTML = `URL: <code>index.html?slugDirArc=${safe}</code>`;
+      slugPreviewEl.innerHTML = `Enlace de Aio Repo: <code>index.html?slugDirArc=${safe}</code>`;
     }
-  });
+  }
+  slugEl.addEventListener('input', updateSlugPreview);
 
   loadSession();
   </script>
