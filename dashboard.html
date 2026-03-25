@@ -5,23 +5,135 @@
   <title>Aio Repo - DirArc Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --bg: #020617;
+      --panel: #0b1220;
+      --panel-soft: #0f172a;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59,130,246,0.2);
+      --border-soft: rgba(148,163,184,0.35);
+      --text-soft: #9ca3af;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background: #020617;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #111827 0, #020617 45%);
       color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    h1, h2, h3 { margin-bottom: 0.5rem; }
-    section {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid rgba(148,163,184,0.3);
-      background: rgba(15,23,42,0.9);
+    a {
+      color: inherit;
+      text-decoration: none;
     }
-    label { display:block; margin: .35rem 0; font-size:.85rem; }
+    .small { font-size:0.8rem; color:var(--text-soft); }
+    .error { color:#fca5a5; font-size:0.8rem; margin-top:0.25rem; }
+    .ok { color:#bbf7d0; font-size:0.8rem; margin-top:0.25rem; }
+
+    /* Layout principal */
+    header {
+      height: 56px;
+      min-height: 56px;
+      padding: 0 1.25rem;
+      background: #020617cc;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(148,163,184,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .header-title {
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .header-title h1 {
+      font-size: 1rem;
+      margin: 0;
+      font-weight: 600;
+    }
+    .header-title span {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+    .header-right {
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+    }
+    .badge-user {
+      font-size:0.8rem;
+      padding:0.2rem 0.5rem;
+      border-radius:999px;
+      background:rgba(15,23,42,0.9);
+      border:1px solid rgba(148,163,184,0.4);
+      color:var(--text-soft);
+      max-width:180px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    button, .btn-link {
+      font-size:0.8rem;
+      border-radius:6px;
+      border:1px solid rgba(148,163,184,0.5);
+      background:rgba(15,23,42,0.9);
+      color:#f9fafb;
+      padding:0.35rem 0.7rem;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:0.25rem;
+      white-space:nowrap;
+    }
+    button.primary {
+      border-color:rgba(59,130,246,0.9);
+      background:linear-gradient(to right,#1d4ed8,#2563eb);
+    }
+    button.secondary {
+      background:#020617;
+    }
+    button:disabled {
+      opacity:0.6;
+      cursor:default;
+    }
+
+    main {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      padding:1rem;
+      max-width:1200px;
+      width:100%;
+      margin:0 auto;
+      gap:1rem;
+    }
+
+    /* Auth panel */
+    #auth-section {
+      background:rgba(15,23,42,0.95);
+      border-radius:10px;
+      border:1px solid var(--border-soft);
+      padding:1rem;
+      margin-bottom:0.5rem;
+    }
+    .row { display:flex; gap:0.75rem; flex-wrap:wrap; }
+    .row > div { flex:1; min-width: 260px; }
+
+    label {
+      display:block;
+      margin: .35rem 0;
+      font-size:.85rem;
+    }
     input, textarea, select {
       width: 100%;
       padding: 0.35rem 0.5rem;
@@ -32,138 +144,360 @@
       color: #e5e7eb;
       font-size: 0.85rem;
     }
-    button {
-      margin-top:0.5rem;
-      padding:0.4rem 0.8rem;
-      border-radius:4px;
-      border:1px solid rgba(96,165,250,0.7);
-      background:#1d4ed8;
-      color:#f9fafb;
+    textarea { resize: vertical; }
+
+    /* Layout de DirArcs + Contenedores */
+    #app-shell {
+      display:flex;
+      gap:1rem;
+      min-height:320px;
+    }
+    #dirarc-column {
+      width:32%;
+      min-width:250px;
+      background:rgba(15,23,42,0.95);
+      border-radius:10px;
+      border:1px solid var(--border-soft);
+      padding:0.75rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.5rem;
+    }
+    #items-column {
+      flex:1;
+      background:rgba(15,23,42,0.95);
+      border-radius:10px;
+      border:1px solid var(--border-soft);
+      padding:0.75rem;
+      display:flex;
+      flex-direction:column;
+    }
+
+    #dirarc-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:0.5rem;
+    }
+    #dirarc-header h2 {
+      margin:0;
+      font-size:0.9rem;
+    }
+
+    ul.dirarc-list {
+      list-style:none;
+      padding-left:0;
+      margin:0.5rem 0 0;
       font-size:0.85rem;
-      cursor:pointer;
+      max-height:420px;
+      overflow-y:auto;
     }
-    button.secondary {
-      background:#0f172a;
-      border-color:rgba(148,163,184,0.7);
-      margin-left:0.25rem;
-    }
-    .row { display:flex; gap:0.75rem; flex-wrap:wrap; }
-    .row > div { flex:1; min-width: 260px; }
-    .small { font-size:0.8rem; color:#9ca3af; }
-    .error { color:#fca5a5; font-size:0.8rem; margin-top:0.25rem; }
-    .ok { color:#bbf7d0; font-size:0.8rem; margin-top:0.25rem; }
-    ul.dirarc-list { list-style:none; padding-left:0; margin-top:0.5rem; font-size:0.85rem; }
     ul.dirarc-list li {
-      padding:0.35rem 0.5rem;
-      border-radius:4px;
+      padding:0.45rem 0.6rem;
+      border-radius:6px;
       border:1px solid transparent;
       cursor:pointer;
       display:flex;
-      justify-content:space-between;
-      align-items:center;
+      flex-direction:column;
+      gap:2px;
     }
     ul.dirarc-list li:hover {
-      border-color:rgba(96,165,250,0.6);
+      border-color:rgba(96,165,250,0.5);
       background:rgba(15,23,42,0.9);
     }
     ul.dirarc-list li.active {
       border-color:rgba(96,165,250,1);
-      background:rgba(30,64,175,0.3);
+      background:rgba(30,64,175,0.35);
     }
-    code { font-size:0.8rem; background:#020617; padding:0.1rem 0.25rem; border-radius:3px; }
-    .items-group { margin-top:0.5rem; }
-    .items-group-title { font-weight:600; font-size:0.85rem; margin-top:0.5rem; }
-    .items-group-item { font-size:0.8rem; margin-left:0.75rem; }
+    .dirarc-main {
+      display:flex;
+      justify-content:space-between;
+      gap:0.4rem;
+      align-items:center;
+    }
+    .dirarc-title {
+      font-size:0.84rem;
+      font-weight:500;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:140px;
+    }
+    .dirarc-slug {
+      font-size:0.7rem;
+      color:var(--text-soft);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .dirarc-meta {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:0.25rem;
+      font-size:0.7rem;
+      color:var(--text-soft);
+    }
+    .chip-count {
+      padding:1px 6px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.45);
+      font-size:0.68rem;
+    }
+
+    #items-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:0.5rem;
+      margin-bottom:0.3rem;
+    }
+    #items-header h2 {
+      margin:0;
+      font-size:0.9rem;
+    }
+    #current-dirarc-label {
+      font-size:0.8rem;
+      color:var(--text-soft);
+    }
+
+    #dirarc-items-view {
+      margin-top:0.2rem;
+      font-size:0.8rem;
+      flex:1;
+      overflow-y:auto;
+      padding-right:0.25rem;
+    }
+    .items-group {
+      margin-top:0.5rem;
+      padding-top:0.35rem;
+      border-top:1px solid rgba(31,41,55,0.9);
+    }
+    .items-group-title {
+      font-weight:600;
+      font-size:0.8rem;
+      margin-bottom:0.2rem;
+      color:#e5e7eb;
+    }
+    .items-group-item {
+      font-size:0.8rem;
+      margin-left:0.25rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0.25rem 0;
+    }
+    .items-group-item span {
+      flex:1;
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* Side panels */
+    .side-panel-overlay {
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.7);
+      backdrop-filter:blur(4px);
+      display:none;
+      z-index:40;
+    }
+    .side-panel-overlay.open {
+      display:block;
+    }
+    .side-panel {
+      position:fixed;
+      top:0;
+      right:-420px;
+      width:380px;
+      max-width:100%;
+      height:100%;
+      background:#020617;
+      border-left:1px solid var(--border-soft);
+      box-shadow:-25px 0 40px rgba(0,0,0,0.8);
+      padding:0.9rem;
+      display:flex;
+      flex-direction:column;
+      gap:0.35rem;
+      transition:right 0.25s ease-out;
+      z-index:50;
+    }
+    .side-panel.open {
+      right:0;
+    }
+    .side-panel-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:0.5rem;
+      margin-bottom:0.2rem;
+    }
+    .side-panel-header h3 {
+      margin:0;
+      font-size:0.9rem;
+    }
+    .side-panel-body {
+      flex:1;
+      overflow-y:auto;
+      padding-right:0.25rem;
+      font-size:0.8rem;
+    }
+    .side-panel-footer {
+      display:flex;
+      justify-content:flex-end;
+      gap:0.4rem;
+      margin-top:0.5rem;
+    }
+    #slug-preview {
+      font-size:0.75rem;
+      color:var(--text-soft);
+      margin-top:0.15rem;
+      word-break:break-all;
+    }
+    #type-preview {
+      font-size:0.75rem;
+      color:var(--text-soft);
+      margin-top:0.3rem;
+    }
+
     .inline-row { display:flex; align-items:center; gap:0.4rem; margin-top:0.35rem; }
-    .inline-row input[type="checkbox"] {
-      width:auto;
-      margin-top:0;
+    .inline-row input[type="checkbox"] { width:auto; margin-top:0; }
+
+    @media (max-width: 900px) {
+      #app-shell {
+        flex-direction:column;
+      }
+      #dirarc-column {
+        width:100%;
+        min-height:180px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Aio Repo – DirArc Dashboard</h1>
-  <p class="small">
-    Administra tus <strong>DirArc</strong> (Directorios Aio Repo de Colecciones): conjuntos de archivos
-    organizados en colecciones que luego verás en Aio Repo con los visores.
-  </p>
-
-  <!-- Auth -->
-  <section id="auth-section">
-    <h2>1. Acceso</h2>
-    <div class="row">
-      <div>
-        <h3>Registro</h3>
-        <p class="small">Crea tu cuenta de host. Sólo necesitas email y contraseña.</p>
-        <label>Email
-          <input id="signup-email" type="email" placeholder="usuario@ejemplo.com" />
-        </label>
-        <label>Contraseña
-          <input id="signup-password" type="password" />
-        </label>
-        <button id="btn-signup">Registrarse</button>
-        <div id="signup-result" class="small"></div>
-      </div>
-      <div>
-        <h3>Login</h3>
-        <p class="small">Si ya tienes cuenta, inicia sesión para ver tus DirArc.</p>
-        <label>Email
-          <input id="login-email" type="email" />
-        </label>
-        <label>Contraseña
-          <input id="login-password" type="password" />
-        </label>
-        <button id="btn-login">Iniciar sesión</button>
-        <button id="btn-logout" class="secondary" style="display:none;">Cerrar sesión</button>
-        <div id="login-result" class="small"></div>
-      </div>
+  <header>
+    <div class="header-title">
+      <h1>Aio Repo – DirArc Dashboard</h1>
+      <span>Gestiona tus DirArcs y contenedores para ArchVista</span>
     </div>
-  </section>
+    <div class="header-right">
+      <div id="user-info" class="badge-user" style="display:none;"></div>
+      <button id="btn-open-create-item-panel" class="secondary" style="display:none;">+ Contenedor</button>
+      <button id="btn-open-create-dirarc-panel" class="primary">+ DirArc</button>
+      <button id="btn-logout" class="secondary" style="display:none;">Cerrar sesión</button>
+    </div>
+  </header>
 
-  <!-- DirArcs -->
-  <section id="dirarc-section" style="display:none;">
-    <h2>2. Mis DirArc</h2>
-    <div class="small" id="user-info"></div>
+  <main>
+    <!-- Auth -->
+    <section id="auth-section">
+      <h2 style="margin-top:0;">Acceso</h2>
+      <div class="row">
+        <div>
+          <h3>Registro</h3>
+          <p class="small">Crea tu cuenta de host. Sólo necesitas email y contraseña.</p>
+          <label>Email
+            <input id="signup-email" type="email" placeholder="usuario@ejemplo.com" />
+          </label>
+          <label>Contraseña
+            <input id="signup-password" type="password" />
+          </label>
+          <button id="btn-signup">Registrarse</button>
+          <div id="signup-result" class="small"></div>
+        </div>
+        <div>
+          <h3>Login</h3>
+          <p class="small">Si ya tienes cuenta, inicia sesión para ver tus DirArc.</p>
+          <label>Email
+            <input id="login-email" type="email" />
+          </label>
+          <label>Contraseña
+            <input id="login-password" type="password" />
+          </label>
+          <button id="btn-login">Iniciar sesión</button>
+          <div id="login-result" class="small"></div>
+        </div>
+      </div>
+    </section>
 
-    <div style="margin-top:1rem;">
-      <h3>Crear nuevo DirArc</h3>
+    <!-- Shell DirArcs + Contenedores -->
+    <div id="app-shell" style="display:none;">
+      <!-- Columna DirArcs -->
+      <section id="dirarc-column">
+        <div id="dirarc-header">
+          <div>
+            <h2>Mis DirArcs</h2>
+            <div class="small" id="dirarc-subtitle">Selecciona un DirArc para gestionar sus contenedores.</div>
+          </div>
+        </div>
+        <ul id="dirarc-list" class="dirarc-list"></ul>
+        <div id="dirarc-list-result" class="small"></div>
+      </section>
+
+      <!-- Columna Contenedores -->
+      <section id="items-column">
+        <div id="items-header">
+          <div>
+            <h2>Contenedores</h2>
+            <div id="current-dirarc-label" class="small">Ningún DirArc seleccionado.</div>
+          </div>
+        </div>
+        <div id="dirarc-items-view" class="small">
+          Inicia sesión y selecciona un DirArc en la columna izquierda.
+        </div>
+        <p class="small" style="margin-top:0.75rem;">
+          Endpoint global de contenido:<br />
+          <code>https://zihojlqhxfxdjahgrbwy.functions.supabase.co/all-content-json</code>
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Overlay + Panel Crear DirArc -->
+  <div id="panel-overlay" class="side-panel-overlay"></div>
+
+  <div id="panel-create-dirarc" class="side-panel">
+    <div class="side-panel-header">
+      <h3>Nuevo DirArc</h3>
+      <button id="btn-close-create-dirarc" class="secondary">Cerrar</button>
+    </div>
+    <div class="side-panel-body">
       <p class="small">
-        Un DirArc es un “content.json virtual” que agrupa tus archivos en colecciones.
+        Un DirArc es un “content.json virtual” que agrupa tus contenedores en colecciones.
         Luego podrás compartir cada DirArc con tus clientes.
       </p>
       <label>Slug (para URL, sin espacios)
         <input id="dirarc-slug" placeholder="casa-herrera-fase-2" />
       </label>
+      <div id="slug-preview" class="small">
+        URL: <code>index.html?slugDirArc=…</code>
+      </div>
       <label>Título
         <input id="dirarc-title" placeholder="Casa Herrera – Fase 2" />
       </label>
       <label>Descripción
-        <textarea id="dirarc-desc" rows="2" placeholder="Colección de archivos para este proyecto."></textarea>
+        <textarea id="dirarc-desc" rows="2" placeholder="Colección de contenedores para este proyecto."></textarea>
       </label>
-      <button id="btn-create-dirarc">Crear DirArc</button>
       <div id="dirarc-create-result" class="small"></div>
     </div>
-
-    <div style="margin-top:1.5rem;">
-      <h3>DirArc existentes</h3>
-      <p class="small">
-        Haz clic en un DirArc para seleccionarlo y luego podrás añadirle ítems en la sección 3.
-      </p>
-      <ul id="dirarc-list" class="dirarc-list"></ul>
-      <div id="dirarc-list-result" class="small"></div>
+    <div class="side-panel-footer">
+      <button id="btn-cancel-dirarc" class="secondary">Cancelar</button>
+      <button id="btn-create-dirarc" class="primary">Crear DirArc</button>
     </div>
-  </section>
+  </div>
 
-  <!-- Items -->
-  <section id="items-section" style="display:none;">
-    <h2>3. Añadir ítems al DirArc seleccionado</h2>
-    <div class="small" id="current-dirarc-label">Ningún DirArc seleccionado.</div>
-
-    <div style="margin-top:1rem;">
-      <h3>Nuevo ítem</h3>
+  <!-- Panel Crear Contenedor -->
+  <div id="panel-create-item" class="side-panel">
+    <div class="side-panel-header">
+      <h3>Nuevo contenedor</h3>
+      <button id="btn-close-create-item" class="secondary">Cerrar</button>
+    </div>
+    <div class="side-panel-body">
       <p class="small">
-        Cada ítem corresponde a un archivo en tu propio almacenamiento (Dropbox, etc.) y a una
-        “cápsula” en Aio Repo. Más tarde Aio Repo lo mostrará con el visor adecuado.
+        Cada contenedor corresponde a una URL (archivo o enlace) más metadatos.
+        ArchVista decidirá el visor adecuado según el tipo.
       </p>
 
       <label>Nombre visible
@@ -180,11 +514,10 @@
         </span>
       </label>
 
-      <label>Archivo (URL pública)
+      <label>Archivo o enlace (URL pública)
         <input id="item-archivo" placeholder="https://www.dropbox.com/..." />
         <span class="small">
-          Pega aquí el enlace compartido público (Dropbox, Drive, YouTube, Vimeo o sitio web).
-          El sistema intentará deducir el visor y la categoría automáticamente.
+          Pega un enlace público (Dropbox, Drive, YouTube, Vimeo, GeoJSON, sitio web, etc.).
         </span>
       </label>
 
@@ -192,42 +525,32 @@
         <div class="inline-row">
           <input type="checkbox" id="item-use-iframe" />
           <label for="item-use-iframe" style="margin:0; font-size:0.8rem;">
-            Ver dentro de AioRepo (iframe) cuando el sitio lo permita
+            Ver dentro de ArchVista (iframe) cuando el sitio lo permita
           </label>
         </div>
         <div class="small">
-          Si está activado, se usará el visor como <code>enlace</code> (iframe).  
-          Si está desactivado, se usará <code>enlaceEXT</code> (tarjeta y abrir en nueva pestaña).
+          Activado → categoría <code>enlace</code> (iframe).<br>
+          Desactivado → <code>enlaceEXT</code> (tarjeta, abrir en nueva pestaña).
         </div>
       </div>
 
+      <div id="type-preview" class="small"></div>
+
       <label>Descripción (opcional)
-        <textarea id="item-descripcion" rows="2" placeholder="Breve descripción del archivo o del propósito."></textarea>
+        <textarea id="item-descripcion" rows="2" placeholder="Breve descripción del contenido."></textarea>
       </label>
 
-      <!-- uiConfig oculto (por ahora no se usa, pero se conserva por si lo necesitas manualmente) -->
       <label style="display:none;">uiConfig (JSON opcional)
         <textarea id="item-ui-config" rows="3" placeholder='{"cameraModes":["orbit"],"visualStyles":["rendered"]}'></textarea>
       </label>
 
-      <button id="btn-add-item">Añadir ítem al DirArc</button>
       <div id="item-result" class="small"></div>
-
-      <p class="small" style="margin-top:1rem;">
-        Endpoint global de contenido (todos los ítems, sin filtrar aún por usuario/DirArc):
-        <br />
-        <code>https://zihojlqhxfxdjahgrbwy.functions.supabase.co/all-content-json</code>
-      </p>
     </div>
-
-    <div style="margin-top:1.5rem;">
-      <h3>Ítems en este DirArc (vista rápida)</h3>
-      <p class="small">
-        Vista tipo explorador: agrupa los ítems por colección dentro del DirArc activo.
-      </p>
-      <div id="dirarc-items-view" class="small"></div>
+    <div class="side-panel-footer">
+      <button id="btn-cancel-item" class="secondary">Cancelar</button>
+      <button id="btn-add-item" class="primary">Crear contenedor</button>
     </div>
-  </section>
+  </div>
 
   <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -242,11 +565,11 @@
   let dirarcsCache = [];
   let dirarcItemsCache = [];
 
+  // ----------------------- Utilidades URL / tipo -----------------------
   function normalizeExternalUrl(original) {
     try {
       const url = new URL(original);
 
-      // --- Dropbox ---
       if (url.hostname.includes('dropbox.com')) {
         url.hostname = 'dl.dropboxusercontent.com';
         url.searchParams.set('raw', '1');
@@ -254,7 +577,6 @@
         return url.toString();
       }
 
-      // --- Google Drive ---
       if (url.hostname.includes('drive.google.com')) {
         const m = url.pathname.match(/\/file\/d\/([^/]+)\/view/);
         if (m && m[1]) {
@@ -275,12 +597,12 @@
   }
 
   function isYoutube(url) {
-  return /youtube\.com\/watch\?v=|youtu\.be\//i.test(url);
-}
+    return /youtube\.com\/watch\?v=|youtu\.be\//i.test(url);
+  }
 
-function isVimeo(url) {
-  return /vimeo\.com\//i.test(url);
-}
+  function isVimeo(url) {
+    return /vimeo\.com\//i.test(url);
+  }
 
   function isStorage(url) {
     return /dropbox\.com|dl\.dropboxusercontent\.com|drive\.google\.com|supabase\.co/i.test(url);
@@ -320,12 +642,10 @@ function isVimeo(url) {
     return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png' };
   }
 
-  // Clasificación específica para media según tu estrategia:
   function classifyUrlForMedia(originalUrl, useIframeFlag) {
     const url = (originalUrl || '').trim();
 
     if (isYoutube(url) || isVimeo(url)) {
-      // Videos YT/Vimeo → visor media + categoria yt/vm
       return {
         visor: 'media',
         categoria: 'yt/vm',
@@ -334,12 +654,13 @@ function isVimeo(url) {
     }
 
     if (isStorage(url)) {
-      // Storage: usar la inferencia por extensión como ya hacías
       return inferMetaFromUrl(url);
     }
 
-    // Cualquier otro dominio: sitio externo genérico
-    // El visor es media, y la categoría depende solo del checkbox
+    if (/^https?:\/\//i.test(url) === false) {
+      return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png' };
+    }
+
     if (useIframeFlag) {
       return { visor: 'media', categoria: 'enlace', thumbnail: 'thumbnails/gt_0.png' };
     } else {
@@ -347,16 +668,16 @@ function isVimeo(url) {
     }
   }
 
+  // ----------------------- UI helpers -----------------------
   function resetDirArcUI() {
     currentDirArc = null;
-    dirarcsCache = [];
     dirarcItemsCache = [];
     const itemsView = document.getElementById('dirarc-items-view');
     const label = document.getElementById('current-dirarc-label');
     const collSelect = document.getElementById('item-coleccion-select');
     const collInput = document.getElementById('item-coleccion-input');
 
-    if (itemsView) itemsView.innerHTML = '';
+    if (itemsView) itemsView.textContent = 'Selecciona un DirArc para ver sus contenedores.';
     if (label) label.textContent = 'Ningún DirArc seleccionado.';
     if (collSelect) {
       collSelect.innerHTML = '';
@@ -370,26 +691,26 @@ function isVimeo(url) {
 
   function setAuthUI(user) {
     const authSection = document.getElementById('auth-section');
-    const dirarcSection = document.getElementById('dirarc-section');
-    const itemsSection = document.getElementById('items-section');
+    const appShell = document.getElementById('app-shell');
     const btnLogout = document.getElementById('btn-logout');
     const userInfo = document.getElementById('user-info');
+    const newItemBtn = document.getElementById('btn-open-create-item-panel');
 
     currentUser = user;
 
     if (!user) {
       authSection.style.display = '';
-      dirarcSection.style.display = 'none';
-      itemsSection.style.display = 'none';
+      appShell.style.display = 'none';
       btnLogout.style.display = 'none';
-      userInfo.textContent = '';
+      userInfo.style.display = 'none';
+      newItemBtn.style.display = 'none';
       resetDirArcUI();
     } else {
       authSection.style.display = '';
-      dirarcSection.style.display = '';
-      itemsSection.style.display = '';
+      appShell.style.display = 'flex';
       btnLogout.style.display = '';
-      userInfo.textContent = `Usuario: ${user.email || user.id}`;
+      userInfo.style.display = 'inline-flex';
+      userInfo.textContent = user.email || user.id;
       resetDirArcUI();
       loadDirArcs();
     }
@@ -405,7 +726,7 @@ function isVimeo(url) {
     setAuthUI(data.user || null);
   }
 
-  // Auth
+  // ----------------------- Auth -----------------------
   document.getElementById('btn-signup').onclick = async () => {
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value.trim();
@@ -423,7 +744,7 @@ function isVimeo(url) {
       resultEl.className = 'small error';
       return;
     }
-    resultEl.textContent = 'Registro iniciado. Ahora puedes iniciar sesión.';
+    resultEl.textContent = 'Registro iniciado. Revisa tu correo y luego inicia sesión.';
     resultEl.className = 'small ok';
   };
 
@@ -456,10 +777,11 @@ function isVimeo(url) {
     document.getElementById('login-result').className = 'small ok';
   };
 
-  // DirArcs
+  // ----------------------- DirArcs -----------------------
   async function loadDirArcs() {
     const listEl = document.getElementById('dirarc-list');
     const resultEl = document.getElementById('dirarc-list-result');
+    const newItemBtn = document.getElementById('btn-open-create-item-panel');
     listEl.innerHTML = '';
     resultEl.textContent = '';
 
@@ -481,35 +803,23 @@ function isVimeo(url) {
     dirarcsCache = data || [];
 
     if (!dirarcsCache.length) {
-      listEl.innerHTML = '<li class="small">No tienes ningún DirArc todavía.</li>';
+      listEl.innerHTML = '<li class="small">No tienes ningún DirArc todavía. Usa el botón “+ DirArc” para crear el primero.</li>';
       resetDirArcUI();
-      const itemsView = document.getElementById('dirarc-items-view');
-      if (itemsView) itemsView.textContent = 'Este DirArc no tiene ítems todavía.';
+      newItemBtn.style.display = 'none';
       return;
     }
 
-    dirarcsCache.forEach(d => {
-      const li = document.createElement('li');
-      li.textContent = `${d.title}  (${d.slug})`;
-      li.onclick = () => {
-        currentDirArc = d;
-        renderDirArcList();
-        renderCurrentDirArcLabel();
-        loadDirArcItems();
-      };
-      if (currentDirArc && currentDirArc.id === d.id) {
-        li.classList.add('active');
-      }
-      listEl.appendChild(li);
-    });
-
-    renderCurrentDirArcLabel();
+    renderDirArcList();
     if (!currentDirArc && dirarcsCache.length > 0) {
       currentDirArc = dirarcsCache[0];
       renderDirArcList();
       renderCurrentDirArcLabel();
       loadDirArcItems();
+    } else {
+      renderCurrentDirArcLabel();
+      if (currentDirArc) loadDirArcItems();
     }
+    newItemBtn.style.display = currentDirArc ? '' : 'none';
   }
 
   function renderDirArcList() {
@@ -523,12 +833,34 @@ function isVimeo(url) {
 
     dirarcsCache.forEach(d => {
       const li = document.createElement('li');
-      li.textContent = `${d.title}  (${d.slug})`;
+      const main = document.createElement('div');
+      main.className = 'dirarc-main';
+
+      const titleSpan = document.createElement('div');
+      titleSpan.className = 'dirarc-title';
+      titleSpan.textContent = d.title;
+
+      const countSpan = document.createElement('div');
+      countSpan.className = 'chip-count';
+      const count = d.items_count ?? ''; // opcional si luego agregas un campo
+      countSpan.textContent = count ? `${count} cont.` : '';
+
+      main.appendChild(titleSpan);
+      main.appendChild(countSpan);
+
+      const meta = document.createElement('div');
+      meta.className = 'dirarc-meta';
+      meta.innerHTML = `<span class="dirarc-slug">${d.slug}</span>`;
+
+      li.appendChild(main);
+      li.appendChild(meta);
+
       li.onclick = () => {
         currentDirArc = d;
         renderDirArcList();
         renderCurrentDirArcLabel();
         loadDirArcItems();
+        document.getElementById('btn-open-create-item-panel').style.display = '';
       };
       if (currentDirArc && currentDirArc.id === d.id) {
         li.classList.add('active');
@@ -546,11 +878,16 @@ function isVimeo(url) {
     }
   }
 
-  document.getElementById('btn-create-dirarc').onclick = async () => {
-    const slug = document.getElementById('dirarc-slug').value.trim();
-    const title = document.getElementById('dirarc-title').value.trim();
-    const description = document.getElementById('dirarc-desc').value.trim();
+  async function createDirArc() {
+    const slugEl = document.getElementById('dirarc-slug');
+    const titleEl = document.getElementById('dirarc-title');
+    const descEl = document.getElementById('dirarc-desc');
     const resultEl = document.getElementById('dirarc-create-result');
+    const btn = document.getElementById('btn-create-dirarc');
+
+    const slug = slugEl.value.trim();
+    const title = titleEl.value.trim();
+    const description = descEl.value.trim();
 
     if (!currentUser) {
       resultEl.textContent = 'Debes iniciar sesión primero.';
@@ -562,6 +899,10 @@ function isVimeo(url) {
       resultEl.className = 'small error';
       return;
     }
+
+    btn.disabled = true;
+    resultEl.textContent = 'Creando DirArc...';
+    resultEl.className = 'small';
 
     const { data, error } = await supabase
       .from('dirarcs')
@@ -575,6 +916,8 @@ function isVimeo(url) {
       .select()
       .single();
 
+    btn.disabled = false;
+
     if (error) {
       console.error(error);
       resultEl.textContent = 'Error creando DirArc: ' + error.message;
@@ -585,17 +928,17 @@ function isVimeo(url) {
     resultEl.textContent = 'DirArc creado.';
     resultEl.className = 'small ok';
 
-    document.getElementById('dirarc-slug').value = '';
-    document.getElementById('dirarc-title').value = '';
-    document.getElementById('dirarc-desc').value = '';
+    slugEl.value = '';
+    titleEl.value = '';
+    descEl.value = '';
 
     currentDirArc = data;
     await loadDirArcs();
     renderCurrentDirArcLabel();
-    loadDirArcItems();
-  };
+    closePanel('dirarc');
+  }
 
-  // Items: vista explorador
+  // ----------------------- Contenedores (items) -----------------------
   async function loadDirArcItems() {
     const viewEl = document.getElementById('dirarc-items-view');
     const collSelect = document.getElementById('item-coleccion-select');
@@ -608,7 +951,7 @@ function isVimeo(url) {
     collSelect.appendChild(opt);
 
     if (!currentDirArc) {
-      viewEl.textContent = 'Selecciona un DirArc para ver sus ítems.';
+      viewEl.textContent = 'Selecciona un DirArc para ver sus contenedores.';
       return;
     }
 
@@ -621,14 +964,14 @@ function isVimeo(url) {
 
     if (error) {
       console.error(error);
-      viewEl.textContent = 'Error cargando ítems del DirArc: ' + error.message;
+      viewEl.textContent = 'Error cargando contenedores del DirArc: ' + error.message;
       return;
     }
 
     dirarcItemsCache = data || [];
 
     if (!dirarcItemsCache.length) {
-      viewEl.textContent = 'Este DirArc no tiene ítems todavía.';
+      viewEl.textContent = 'Este DirArc no tiene contenedores todavía. Usa “+ Contenedor” para añadir uno.';
       return;
     }
 
@@ -661,7 +1004,7 @@ function isVimeo(url) {
         line.className = 'items-group-item';
 
         const label = document.createElement('span');
-        label.textContent = `• ${it.item_id} — ${it.nombre}  [visor: ${it.visor}, categoria: ${it.categoria}]`;
+        label.textContent = `• ${it.item_id} — ${it.nombre}  [visor: ${it.visor}, categoría: ${it.categoria}]`;
 
         const btn = document.createElement('button');
         btn.textContent = 'Borrar';
@@ -670,7 +1013,7 @@ function isVimeo(url) {
 
         btn.onclick = async (e) => {
           e.stopPropagation();
-          const ok = confirm(`¿Borrar el ítem ${it.item_id}?`);
+          const ok = confirm(`¿Borrar el contenedor ${it.item_id}?`);
           if (!ok) return;
 
           const { error } = await supabase
@@ -680,7 +1023,7 @@ function isVimeo(url) {
 
           if (error) {
             console.error(error);
-            alert('Error borrando ítem: ' + error.message);
+            alert('Error borrando contenedor: ' + error.message);
             return;
           }
 
@@ -696,40 +1039,47 @@ function isVimeo(url) {
     });
   }
 
-  // Items: selección de colección (dropdown + texto)
+  // selección de colección
   const collSelectEl = document.getElementById('item-coleccion-select');
   const collInputEl = document.getElementById('item-coleccion-input');
   collSelectEl.addEventListener('change', () => {
     const val = collSelectEl.value;
-    if (val) {
-      collInputEl.value = val;
-    } else {
-      collInputEl.value = '';
-    }
+    collInputEl.value = val || '';
   });
 
-  // Mostrar/ocultar checkbox iframe según tipo de URL
   const archivoInputEl = document.getElementById('item-archivo');
   const iframeOptionsEl = document.getElementById('external-link-options');
-  archivoInputEl.addEventListener('input', () => {
+  const typePreviewEl = document.getElementById('type-preview');
+  const useIframeEl = document.getElementById('item-use-iframe');
+
+  function updateTypePreview() {
     const url = archivoInputEl.value.trim();
+    const useIframe = useIframeEl.checked;
     if (!url) {
       iframeOptionsEl.style.display = 'none';
+      typePreviewEl.textContent = '';
       return;
     }
     if (isYoutube(url) || isVimeo(url) || isStorage(url)) {
-      // YT/Vimeo/Storage: no tiene sentido preguntar por iframe
       iframeOptionsEl.style.display = 'none';
     } else if (/^https?:\/\//i.test(url)) {
-      // Sitio externo genérico: ofrecer la opción iframe
       iframeOptionsEl.style.display = 'block';
     } else {
       iframeOptionsEl.style.display = 'none';
     }
+
+    const meta = classifyUrlForMedia(url, useIframe);
+    typePreviewEl.textContent = `Se detectará como visor “${meta.visor}” y categoría “${meta.categoria}”.`;
+  }
+
+  archivoInputEl.addEventListener('input', () => {
+    updateTypePreview();
+  });
+  useIframeEl.addEventListener('change', () => {
+    updateTypePreview();
   });
 
-  // Items: insertar con ID autogenerado e inferencias
-  document.getElementById('btn-add-item').onclick = async () => {
+  async function createItem() {
     const resultEl = document.getElementById('item-result');
 
     if (!currentUser || !currentDirArc) {
@@ -744,9 +1094,10 @@ function isVimeo(url) {
     const descripcion = document.getElementById('item-descripcion').value.trim();
     const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
     const useIframe = document.getElementById('item-use-iframe').checked;
+    const btn = document.getElementById('btn-add-item');
 
     if (!nombre || !coleccion || !archivo) {
-      resultEl.textContent = 'Nombre, colección y archivo son obligatorios.';
+      resultEl.textContent = 'Nombre, colección y archivo/enlace son obligatorios.';
       resultEl.className = 'small error';
       return;
     }
@@ -756,7 +1107,6 @@ function isVimeo(url) {
     const count = dirarcItemsCache.length || 0;
     const itemId = `${baseSlug}_${String(count + 1).padStart(3, '0')}`;
 
-    // Clasificación según la estrategia nueva
     const meta = classifyUrlForMedia(archivo, useIframe);
     const resolvedUrl = normalizeExternalUrl(archivo);
     const source = resolvedUrl.startsWith('http') ? 'url' : 'local';
@@ -771,6 +1121,10 @@ function isVimeo(url) {
         return;
       }
     }
+
+    btn.disabled = true;
+    resultEl.textContent = 'Creando contenedor...';
+    resultEl.className = 'small';
 
     const { error } = await supabase.from('items').insert({
       dirarc_id: currentDirArc.id,
@@ -788,14 +1142,16 @@ function isVimeo(url) {
       ui_config: uiConfig
     });
 
+    btn.disabled = false;
+
     if (error) {
       console.error(error);
-      resultEl.textContent = 'Error insertando ítem: ' + error.message;
+      resultEl.textContent = 'Error insertando contenedor: ' + error.message;
       resultEl.className = 'small error';
       return;
     }
 
-    resultEl.textContent = 'Ítem creado correctamente en el DirArc.';
+    resultEl.textContent = 'Contenedor creado correctamente en el DirArc.';
     resultEl.className = 'small ok';
 
     document.getElementById('item-nombre').value = '';
@@ -804,12 +1160,72 @@ function isVimeo(url) {
     document.getElementById('item-ui-config').value = '';
     document.getElementById('item-use-iframe').checked = false;
     iframeOptionsEl.style.display = 'none';
+    typePreviewEl.textContent = '';
 
-    loadDirArcItems();
+    await loadDirArcItems();
+    closePanel('item');
+  }
+
+  // ----------------------- Paneles laterales -----------------------
+  const overlayEl = document.getElementById('panel-overlay');
+  const panelDirArcEl = document.getElementById('panel-create-dirarc');
+  const panelItemEl = document.getElementById('panel-create-item');
+
+  function openPanel(type) {
+    overlayEl.classList.add('open');
+    if (type === 'dirarc') {
+      panelDirArcEl.classList.add('open');
+    } else if (type === 'item') {
+      if (!currentDirArc) return;
+      panelItemEl.classList.add('open');
+      document.getElementById('item-result').textContent = '';
+    }
+  }
+
+  function closePanel(type) {
+    if (type === 'dirarc') {
+      panelDirArcEl.classList.remove('open');
+    } else if (type === 'item') {
+      panelItemEl.classList.remove('open');
+    }
+    if (!panelDirArcEl.classList.contains('open') && !panelItemEl.classList.contains('open')) {
+      overlayEl.classList.remove('open');
+    }
+  }
+
+  document.getElementById('btn-open-create-dirarc-panel').onclick = () => openPanel('dirarc');
+  document.getElementById('btn-close-create-dirarc').onclick = () => closePanel('dirarc');
+  document.getElementById('btn-cancel-dirarc').onclick = () => closePanel('dirarc');
+
+  document.getElementById('btn-open-create-item-panel').onclick = () => openPanel('item');
+  document.getElementById('btn-close-create-item').onclick = () => closePanel('item');
+  document.getElementById('btn-cancel-item').onclick = () => closePanel('item');
+
+  overlayEl.onclick = () => {
+    closePanel('dirarc');
+    closePanel('item');
   };
+
+  document.getElementById('btn-create-dirarc').onclick = createDirArc;
+  document.getElementById('btn-add-item').onclick = createItem;
+
+  // preview slug
+  const slugEl = document.getElementById('dirarc-slug');
+  const slugPreviewEl = document.getElementById('slug-preview');
+  slugEl.addEventListener('input', () => {
+    const raw = slugEl.value.trim();
+    const safe = raw.replace(/[^a-zA-Z0-9\-]/g, '-');
+    if (raw !== safe) {
+      slugEl.value = safe;
+    }
+    if (!safe) {
+      slugPreviewEl.innerHTML = 'URL: <code>index.html?slugDirArc=…</code>';
+    } else {
+      slugPreviewEl.innerHTML = `URL: <code>index.html?slugDirArc=${safe}</code>`;
+    }
+  });
 
   loadSession();
   </script>
-
 </body>
 </html>
