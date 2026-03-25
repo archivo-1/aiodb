@@ -58,8 +58,8 @@
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
     // TODO: replace with your real values from Supabase Settings → API
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY_HERE';
+    const SUPABASE_URL = 'https://zihojlqhxfxdjahgrbwy.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_TZeZu-g4BDlcdXOfWpUG_Q_rN-Sur8t';
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -115,7 +115,7 @@
       }
 
       const viewerUrl = `https://archivo-1.github.io/aiorepo/?collection=${encodeURIComponent(slug)}`;
-      const editUrl = `https://your-dashboard-host/edit?collection=${encodeURIComponent(slug)}&key=${encodeURIComponent(ownerSecret)}`;
+      const editUrl = `https://archivo-1.github.io/aiodashboard/edit?collection=${encodeURIComponent(slug)}&key=${encodeURIComponent(ownerSecret)}`;
 
       resultEl.innerHTML = `
         <div><strong>Colección creada.</strong></div>
