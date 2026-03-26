@@ -648,39 +648,54 @@
   function humanSourceLabel(url, categoria, useIframe) {
     if (!url) return '';
     let host = '';
+    let u = null;
     try {
-      const u = new URL(url);
+      u = new URL(url);
       host = u.hostname.replace(/^www\./, '');
     } catch {
+      // Si la URL no es parseable, devolvemos el string tal cual
       return url;
     }
 
+    // YouTube / Vimeo
     if (isYoutube(url) || isVimeo(url) || categoria === 'yt/vm') {
       const prefix = 'Video incrustado';
-      const service = host.includes('youtube') ? 'YouTube' : host.includes('vimeo') ? 'Vimeo' : host;
+      const service = host.includes('youtube')
+        ? 'YouTube'
+        : host.includes('vimeo')
+        ? 'Vimeo'
+        : host;
       return `${prefix} – ${service}`;
     }
 
+    // Dropbox
     if (host.includes('dropbox')) {
-      const parts = u.pathname.split('/');
+      const parts = (u.pathname || '').split('/');
       const file = parts[parts.length - 1] || '';
       const cleanFile = file.split('?')[0] || file;
       return `${cleanFile || 'Archivo'} – Dropbox`;
     }
 
+    // Google Drive
     if (host.includes('drive.google.com')) {
       return 'Archivo – Google Drive';
     }
 
+    // Supabase
     if (host.includes('supabase.co')) {
       return 'Archivo – Supabase Storage';
     }
 
+    // Enlaces genéricos / incrustados
     if (categoria === 'enlace' || categoria === 'enlaceEXT' || useIframe) {
-      const prefix = categoria === 'enlace' || useIframe ? 'Contenido incrustado' : 'Enlace externo';
+      const prefix =
+        categoria === 'enlace' || useIframe
+          ? 'Contenido incrustado'
+          : 'Enlace externo';
       return `${prefix} – ${host}`;
     }
 
+    // Fallback: mostramos la URL completa
     return url;
   }
 
