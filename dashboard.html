@@ -1369,30 +1369,37 @@
       groupDiv.appendChild(title);
 
       groups[coll].forEach(it => {
-        const line = document.createElement('div');
-        line.className = 'items-group-item';
+  const line = document.createElement('div');
+  line.className = 'items-group-item';
 
-        const main = document.createElement('div');
-        main.className = 'item-main';
+  const main = document.createElement('div');
+  main.className = 'item-main';
 
-        const meta = classifyUrlForMedia(it.resolved_url || it.archivo || '', it.categoria === 'enlace');
-        const icon = document.createElement('div');
-        icon.className = 'item-icon';
-        icon.textContent = (meta.icon || '●');
+  // Usar SIEMPRE la URL efectiva normalizada
+  const effectiveUrl = it.resolved_url || it.archivo || '';
 
-        const textWrap = document.createElement('div');
-        textWrap.className = 'item-text';
+  const meta = classifyUrlForMedia(effectiveUrl, it.categoria === 'enlace');
+  const icon = document.createElement('div');
+  icon.className = 'item-icon';
+  icon.textContent = meta.icon || '●';
 
-        const nameSpan = document.createElement('div');
-        nameSpan.className = 'item-name';
-        nameSpan.textContent = it.nombre || it.item_id;
+  const textWrap = document.createElement('div');
+  textWrap.className = 'item-text';
 
-        const urlSpan = document.createElement('div');
-        urlSpan.className = 'item-url';
-        urlSpan.textContent = humanSourceLabel(it.archivo, it.categoria, it.categoria === 'enlace');
+  const nameSpan = document.createElement('div');
+  nameSpan.className = 'item-name';
+  nameSpan.textContent = it.nombre || it.item_id;
 
-        textWrap.appendChild(nameSpan);
-        textWrap.appendChild(urlSpan);
+  const urlSpan = document.createElement('div');
+  urlSpan.className = 'item-url';
+  urlSpan.textContent = humanSourceLabel(
+    effectiveUrl,
+    it.categoria,
+    it.categoria === 'enlace'
+  );
+
+  textWrap.appendChild(nameSpan);
+  textWrap.appendChild(urlSpan);
 
         main.appendChild(icon);
         main.appendChild(textWrap);
@@ -1516,24 +1523,28 @@
   const useIframeEl = document.getElementById('item-use-iframe');
 
   function updateTypePreview() {
-    const url = archivoInputEl.value.trim();
-    const useIframe = useIframeEl.checked;
-    if (!url) {
-      iframeOptionsEl.style.display = 'none';
-      typePreviewEl.textContent = '';
-      return;
-    }
-    if (isYoutube(url) || isVimeo(url) || isStorage(url)) {
-      iframeOptionsEl.style.display = 'none';
-    } else if (/^https?:\/\//i.test(url)) {
-      iframeOptionsEl.style.display = 'block';
-    } else {
-      iframeOptionsEl.style.display = 'none';
-    }
-
-    const meta = classifyUrlForMedia(url, useIframe);
-    typePreviewEl.textContent = `Se detectará como visor “${meta.visor}” y categoría “${meta.categoria}”.`;
+  const original = archivoInputEl.value.trim();
+  const useIframe = useIframeEl.checked;
+  if (!original) {
+    iframeOptionsEl.style.display = 'none';
+    typePreviewEl.textContent = '';
+    return;
   }
+
+  const url = normalizeExternalUrl(original);  // <-- usar normalizada
+
+  if (isYoutube(url) || isVimeo(url) || isStorage(url)) {
+    iframeOptionsEl.style.display = 'none';
+  } else if (/^https?:\/\//i.test(url)) {
+    iframeOptionsEl.style.display = 'block';
+  } else {
+    iframeOptionsEl.style.display = 'none';
+  }
+
+  const meta = classifyUrlForMedia(url, useIframe);
+  typePreviewEl.textContent = `Se detectará como visor “${meta.visor}” y categoría “${meta.categoria}”.`;
+}
+}
 
   archivoInputEl.addEventListener('input', updateTypePreview);
   useIframeEl.addEventListener('change', updateTypePreview);
