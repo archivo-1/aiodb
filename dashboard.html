@@ -773,39 +773,166 @@
     return url;
   }
 
-  function inferMetaFromUrl(url) {
-    const safe = (url || '').split('#')[0].split('?')[0];
-    const lower = safe.toLowerCase();
+  // Decide visor + categoría + icono a partir de la extensión del archivo.
+// Esta función es el "contrato" entre Aio Dashboard y los visores de ArchVista.
+// Regla mental para extenderla:
+//
+// 1) Identificar el visor que debe abrirse para una extensión nueva:
+//    - 'ifc'  → visor-ifc
+//    - '3dm'  → visor-3dm
+//    - 'glb'  → visor-glb
+//    - 'dxf'  → visor-dxf
+//    - 'media' (genérico) → viewer-media (PDF, imágenes, audio, video, texto, etc.)
+//    - 'map'  → visor de mapas (GeoJSON, etc.).
+//
+// 2) Elegir una categoría legible para humanos (ej: 'modelo-BIM', 'imagen', 'audio').
+// 3) Elegir thumbnail (pequeño PNG en /thumbnails) e icono corto de texto.
+// 4) Añadir un bloque if/else siguiendo las secciones comentadas de abajo.
+//
+function inferMetaFromUrl(url) {
+  // Normalizamos: removemos fragmentos (#...) y query (?...) para quedarnos con la ruta pura.
+  const safe = (url || '').split('#')[0].split('?')[0];
+  const lower = safe.toLowerCase();
 
-    if (lower.endsWith('.pdf')) {
-      return { visor: 'media', categoria: 'pdf', thumbnail: 'thumbnails/gt_pdf.png', icon: 'P' };
-    }
-    if (lower.endsWith('.ifc')) {
-      return { visor: 'ifc', categoria: 'modelo-BIM', thumbnail: 'thumbnails/gt_ifc.png', icon: 'I' };
-    }
-    if (lower.endsWith('.3dm')) {
-      return { visor: '3dm', categoria: 'modelo-3d', thumbnail: 'thumbnails/gt_3dm.png', icon: '3' };
-    }
-    if (lower.endsWith('.dxf')) {
-      return { visor: 'dxf', categoria: 'plano-2d', thumbnail: 'thumbnails/gt_dxf.png', icon: 'D' };
-    }
-    if (lower.endsWith('.glb')) {
-      return { visor: 'glb', categoria: 'modelo-3d', thumbnail: 'thumbnails/gt_glb.png', icon: 'G' };
-    }
-    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp')) {
-      return { visor: 'media', categoria: 'imagen', thumbnail: 'thumbnails/gt_img.png', icon: 'IMG' };
-    }
-    if (lower.endsWith('.mp4') || lower.endsWith('.webm')) {
-      return { visor: 'media', categoria: 'video', thumbnail: 'thumbnails/gt_mp4.png', icon: 'V' };
-    }
-    if (lower.endsWith('.mp3') || lower.endsWith('.wav') || lower.endsWith('.ogg')) {
-      return { visor: 'media', categoria: 'audio', thumbnail: 'thumbnails/gt_audio.png', icon: 'A' };
-    }
-    if (lower.endsWith('.geojson') || lower.endsWith('.json')) {
-      return { visor: 'map', categoria: 'mapa', thumbnail: 'thumbnails/gt_map.png', icon: 'M' };
-    }
-    return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png', icon: '●' };
+  // ---------------------------------------------------------------------------
+  // 1) Documentos y texto
+  // ---------------------------------------------------------------------------
+
+  // PDF (abre en viewer-media como documento)
+  if (lower.endsWith('.pdf')) {
+    return {
+      visor: 'media',          // viewer-media.html
+      categoria: 'pdf',
+      thumbnail: 'thumbnails/gt_pdf.png',
+      icon: 'P'
+    };
   }
+
+  // Texto plano (.txt) - si viewer-media ya sabe mostrar texto, simplemente lo catalogamos.
+  if (lower.endsWith('.txt')) {
+    return {
+      visor: 'media',          // viewer-media.html
+      categoria: 'texto',
+      thumbnail: 'thumbnails/gt_0.png', // puedes cambiar a un ícono específico si lo creas
+      icon: 'TXT'
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2) Modelos 3D / BIM
+  // ---------------------------------------------------------------------------
+
+  // IFC (modelo BIM)
+  if (lower.endsWith('.ifc')) {
+    return {
+      visor: 'ifc',            // viewer-ifc.html
+      categoria: 'modelo-BIM',
+      thumbnail: 'thumbnails/gt_ifc.png',
+      icon: 'I'
+    };
+  }
+
+  // Rhino 3DM (modelo 3D)
+  if (lower.endsWith('.3dm')) {
+    return {
+      visor: '3dm',            // viewer-3dm.html
+      categoria: 'modelo-3d',
+      thumbnail: 'thumbnails/gt_3dm.png',
+      icon: '3'
+    };
+  }
+
+  // DXF (plano 2D)
+  if (lower.endsWith('.dxf')) {
+    return {
+      visor: 'dxf',            // viewer-dxf.html
+      categoria: 'plano-2d',
+      thumbnail: 'thumbnails/gt_dxf.png',
+      icon: 'D'
+    };
+  }
+
+  // GLB / GLTF (modelo 3D genérico)
+  if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
+    return {
+      visor: 'glb',            // viewer-glb.html
+      categoria: 'modelo-3d',
+      thumbnail: 'thumbnails/gt_glb.png',
+      icon: 'G'
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // 3) Imágenes, video, audio (media genérica)
+  // ---------------------------------------------------------------------------
+
+  // Imágenes
+  if (
+    lower.endsWith('.jpg') ||
+    lower.endsWith('.jpeg') ||
+    lower.endsWith('.png') ||
+    lower.endsWith('.webp') ||
+    lower.endsWith('.gif')
+  ) {
+    return {
+      visor: 'media',          // viewer-media.html
+      categoria: 'imagen',
+      thumbnail: 'thumbnails/gt_img.png',
+      icon: 'IMG'
+    };
+  }
+
+  // Video
+  if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.mov')) {
+    return {
+      visor: 'media',          // viewer-media.html
+      categoria: 'video',
+      thumbnail: 'thumbnails/gt_mp4.png',
+      icon: 'V'
+    };
+  }
+
+  // Audio
+  if (lower.endsWith('.mp3') || lower.endsWith('.wav') || lower.endsWith('.ogg')) {
+    return {
+      visor: 'media',          // viewer-media.html
+      categoria: 'audio',
+      thumbnail: 'thumbnails/gt_audio.png',
+      icon: 'A'
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // 4) Mapas / datos geoespaciales
+  // ---------------------------------------------------------------------------
+
+  // GeoJSON / JSON (mapa)
+  if (lower.endsWith('.geojson') || lower.endsWith('.json')) {
+    return {
+      visor: 'map',            // viewer-map.html (o equivalente)
+      categoria: 'mapa',
+      thumbnail: 'thumbnails/gt_map.png',
+      icon: 'M'
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // 5) Fallback genérico
+  // ---------------------------------------------------------------------------
+
+  // Si llegamos aquí:
+  // - La extensión no está mapeada explícitamente.
+  // - Elegimos viewer-media como visor genérico.
+  // - categoria: 'otro'. Si algún día viewer-media intenta adivinar tipo por su cuenta
+  //   cuando categoria es 'otro' o null, este es el lugar donde delegamos esa decisión.
+  return {
+    visor: 'media',            // viewer-media.html como fallback universal
+    categoria: 'otro',
+    thumbnail: 'thumbnails/gt_0.png',
+    icon: '●'
+  };
+}
+
 
   function classifyUrlForMedia(originalUrl, useIframeFlag) {
     const url = (originalUrl || '').trim();
