@@ -62,6 +62,7 @@
       display:flex;
       align-items:center;
       gap:0.5rem;
+      position:relative;
     }
     .badge-user {
       font-size:0.8rem;
@@ -74,6 +75,7 @@
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
+      cursor:pointer;
     }
     button {
       font-size:0.8rem;
@@ -102,6 +104,38 @@
     button:disabled {
       opacity:0.6;
       cursor:default;
+    }
+
+    /* User menu */
+    #user-menu {
+      position:absolute;
+      top:110%;
+      right:0;
+      background:rgba(15,23,42,0.97);
+      border:1px solid var(--border-soft);
+      border-radius:8px;
+      min-width:180px;
+      box-shadow:0 12px 30px rgba(0,0,0,0.6);
+      padding:0.25rem 0;
+      display:none;
+      z-index:30;
+    }
+    #user-menu.open { display:block; }
+    .user-menu-item {
+      padding:0.4rem 0.75rem;
+      font-size:0.8rem;
+      cursor:pointer;
+      color:#e5e7eb;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:0.5rem;
+    }
+    .user-menu-item:hover {
+      background:#111827;
+    }
+    .user-menu-item.danger {
+      color:#fca5a5;
     }
 
     main {
@@ -258,6 +292,16 @@
       font-size:0.8rem;
       color:var(--text-soft);
     }
+    #items-header-right {
+      display:flex;
+      align-items:center;
+      gap:0.4rem;
+    }
+    #items-search {
+      min-width:180px;
+      max-width:240px;
+      font-size:0.8rem;
+    }
 
     #dirarc-items-view {
       margin-top:0.2rem;
@@ -405,6 +449,10 @@
         width:100%;
         min-height:180px;
       }
+      #items-header-right {
+        flex-wrap:wrap;
+        justify-content:flex-end;
+      }
     }
   </style>
 </head>
@@ -416,6 +464,15 @@
     </div>
     <div class="header-right">
       <div id="user-info" class="badge-user" style="display:none;"></div>
+      <div id="user-menu">
+        <div class="user-menu-item" id="menu-change-password">
+          Cambiar contraseña
+        </div>
+        <!-- Más adelante podrías añadir borrar datos/cuenta aquí -->
+        <div class="user-menu-item" id="menu-logout">
+          Cerrar sesión
+        </div>
+      </div>
       <button id="btn-open-create-item-panel" class="secondary" style="display:none;">+ Contenedor</button>
       <button id="btn-open-create-dirarc-panel" class="primary">+ Aio Repo</button>
       <button id="btn-logout" class="secondary" style="display:none;">Cerrar sesión</button>
@@ -423,7 +480,7 @@
   </header>
 
   <main>
-    <!-- Auth (solo sin sesión) -->
+    <!-- Auth -->
     <section id="auth-section">
       <h2 style="margin-top:0;">Acceso</h2>
       <div class="row">
@@ -454,9 +511,9 @@
       </div>
     </section>
 
-    <!-- Shell principal -->
+    <!-- Shell -->
     <div id="app-shell" style="display:none;">
-      <!-- Columna Aio Repo -->
+      <!-- Aio Repo -->
       <section id="dirarc-column">
         <div id="dirarc-header">
           <div>
@@ -468,21 +525,20 @@
         <div id="dirarc-list-result" class="small"></div>
       </section>
 
-      <!-- Columna Contenedores -->
+      <!-- Contenedores -->
       <section id="items-column">
         <div id="items-header">
           <div>
             <h2>Contenedores</h2>
             <div id="current-dirarc-label" class="small">Ningún Aio Repo seleccionado.</div>
           </div>
+          <div id="items-header-right">
+            <input id="items-search" type="text" placeholder="Buscar contenedores..." />
+          </div>
         </div>
         <div id="dirarc-items-view" class="small">
           Inicia sesión y selecciona un Aio Repo en la columna izquierda.
         </div>
-        <p class="small" style="margin-top:0.75rem;">
-          Endpoint global de contenido:<br />
-          <code>https://zihojlqhxfxdjahgrbwy.functions.supabase.co/all-content-json</code>
-        </p>
       </section>
     </div>
   </main>
@@ -585,12 +641,36 @@
     </div>
   </div>
 
+  <!-- Panel cambiar contraseña -->
+  <div id="panel-password" class="side-panel">
+    <div class="side-panel-header">
+      <h3>Cambiar contraseña</h3>
+      <button id="btn-close-password" class="secondary icon">✕</button>
+    </div>
+    <div class="side-panel-body">
+      <p class="small">
+        Ingresa una nueva contraseña para tu cuenta de Aio Repo.
+      </p>
+      <label>Nueva contraseña
+        <input id="password-new" type="password" />
+      </label>
+      <label>Confirmar contraseña
+        <input id="password-confirm" type="password" />
+      </label>
+      <div id="password-result" class="small"></div>
+    </div>
+    <div class="side-panel-footer">
+      <button id="btn-cancel-password" class="secondary">Cancelar</button>
+      <button id="btn-save-password" class="primary">Guardar contraseña</button>
+    </div>
+  </div>
+
   <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
   const SUPABASE_URL = 'https://zihojlqhxfxdjahgrbwy.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_TZeZu-g4BDlcdXOfWpUG_Q_rN-Sur8t';
-  const ARCHVISTA_BASE = 'https://archivo-1.github.io/aiorepo.c'; // base pública de ArchVista
+  const ARCHVISTA_BASE = 'https://archivo-1.github.io/aiorepo.c';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -598,6 +678,7 @@
   let currentDirArc = null;
   let dirarcsCache = [];
   let dirarcItemsCache = [];
+  let currentSearchTerm = '';
 
   let editingDirArc = null;
   let editingItem = null;
@@ -653,11 +734,9 @@
       u = new URL(url);
       host = u.hostname.replace(/^www\./, '');
     } catch {
-      // Si la URL no es parseable, devolvemos el string tal cual
       return url;
     }
 
-    // YouTube / Vimeo
     if (isYoutube(url) || isVimeo(url) || categoria === 'yt/vm') {
       const prefix = 'Video incrustado';
       const service = host.includes('youtube')
@@ -668,7 +747,6 @@
       return `${prefix} – ${service}`;
     }
 
-    // Dropbox
     if (host.includes('dropbox')) {
       const parts = (u.pathname || '').split('/');
       const file = parts[parts.length - 1] || '';
@@ -676,17 +754,14 @@
       return `${cleanFile || 'Archivo'} – Dropbox`;
     }
 
-    // Google Drive
     if (host.includes('drive.google.com')) {
       return 'Archivo – Google Drive';
     }
 
-    // Supabase
     if (host.includes('supabase.co')) {
       return 'Archivo – Supabase Storage';
     }
 
-    // Enlaces genéricos / incrustados
     if (categoria === 'enlace' || categoria === 'enlaceEXT' || useIframe) {
       const prefix =
         categoria === 'enlace' || useIframe
@@ -695,7 +770,6 @@
       return `${prefix} – ${host}`;
     }
 
-    // Fallback: mostramos la URL completa
     return url;
   }
 
@@ -768,6 +842,7 @@
     const label = document.getElementById('current-dirarc-label');
     const collSelect = document.getElementById('item-coleccion-select');
     const collInput = document.getElementById('item-coleccion-input');
+    const searchInput = document.getElementById('items-search');
 
     if (itemsView) itemsView.textContent = 'Selecciona un Aio Repo para ver sus contenedores.';
     if (label) label.textContent = 'Ningún Aio Repo seleccionado.';
@@ -779,6 +854,10 @@
       collSelect.appendChild(opt);
     }
     if (collInput) collInput.value = '';
+    if (searchInput) {
+      searchInput.value = '';
+      currentSearchTerm = '';
+    }
   }
 
   function setAuthUI(user) {
@@ -1002,7 +1081,7 @@
       btnCopy.onclick = async ev => {
         ev.stopPropagation();
         try {
-          await navigator.clipboard.writeText(fullUrl); // [web:424][web:448]
+          await navigator.clipboard.writeText(fullUrl);
         } catch (err) {
           console.warn('No se pudo copiar al portapapeles', err);
         }
@@ -1015,7 +1094,7 @@
               title: d.title || 'Aio Repo',
               text: d.description || 'Aio Repo en ArchVista',
               url: fullUrl
-            }); // [web:439][web:442]
+            });
           } catch (err) {
             console.warn('Error al compartir', err);
           }
@@ -1164,18 +1243,48 @@
     }
 
     dirarcItemsCache = data || [];
+    renderItemsWithFilter();
+  }
+
+  function renderItemsWithFilter() {
+    const viewEl = document.getElementById('dirarc-items-view');
+    const collSelect = document.getElementById('item-coleccion-select');
+    viewEl.innerHTML = '';
 
     if (!dirarcItemsCache.length) {
       viewEl.textContent = 'Este Aio Repo no tiene contenedores todavía. Usa “+ Contenedor”.';
       return;
     }
 
+    const term = (currentSearchTerm || '').toLowerCase();
+
+    const filtered = dirarcItemsCache.filter(it => {
+      if (!term) return true;
+      const label = (it.nombre || '').toLowerCase();
+      const coll = (it.coleccion || '').toLowerCase();
+      const human = humanSourceLabel(it.archivo, it.categoria, it.categoria === 'enlace').toLowerCase();
+      return label.includes(term) || coll.includes(term) || human.includes(term);
+    });
+
+    if (!filtered.length) {
+      viewEl.textContent = 'No se encontraron contenedores que coincidan con la búsqueda.';
+      return;
+    }
+
+    // reconstruir colecciones
     const groups = {};
-    dirarcItemsCache.forEach(it => {
+    filtered.forEach(it => {
       const key = it.coleccion || '(sin colección)';
       if (!groups[key]) groups[key] = [];
       groups[key].push(it);
     });
+
+    // reconstruir opciones de colecciones filtradas (excepto '(sin colección)')
+    collSelect.innerHTML = '';
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Escribe una nueva colección…';
+    collSelect.appendChild(opt);
 
     const keys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
 
@@ -1270,7 +1379,7 @@
         btnCopy.onclick = async ev => {
           ev.stopPropagation();
           try {
-            await navigator.clipboard.writeText(viewerUrl); // [web:424][web:448]
+            await navigator.clipboard.writeText(viewerUrl);
           } catch (err) {
             console.warn('No se pudo copiar enlace', err);
           }
@@ -1284,7 +1393,7 @@
                 title: it.nombre || 'Contenedor ArchVista',
                 text: it.descripcion || 'Contenido en ArchVista',
                 url: viewerUrl
-              }); // [web:439][web:443]
+              });
             } catch (err) {
               console.warn('Error al compartir', err);
             }
@@ -1496,6 +1605,7 @@
   const overlayEl = document.getElementById('panel-overlay');
   const panelDirArcEl = document.getElementById('panel-create-dirarc');
   const panelItemEl = document.getElementById('panel-create-item');
+  const panelPasswordEl = document.getElementById('panel-password');
 
   function openPanel(type) {
     overlayEl.classList.add('open');
@@ -1504,6 +1614,8 @@
     } else if (type === 'item') {
       if (!currentDirArc) return;
       panelItemEl.classList.add('open');
+    } else if (type === 'password') {
+      panelPasswordEl.classList.add('open');
     }
   }
 
@@ -1518,8 +1630,15 @@
       editingItem = null;
       document.getElementById('item-panel-title').textContent = 'Nuevo contenedor';
       document.getElementById('item-result').textContent = '';
+    } else if (type === 'password') {
+      panelPasswordEl.classList.remove('open');
+      document.getElementById('password-new').value = '';
+      document.getElementById('password-confirm').value = '';
+      document.getElementById('password-result').textContent = '';
     }
-    if (!panelDirArcEl.classList.contains('open') && !panelItemEl.classList.contains('open')) {
+    if (!panelDirArcEl.classList.contains('open') &&
+        !panelItemEl.classList.contains('open') &&
+        !panelPasswordEl.classList.contains('open')) {
       overlayEl.classList.remove('open');
     }
   }
@@ -1553,9 +1672,13 @@
   document.getElementById('btn-close-create-item').onclick = () => closePanel('item');
   document.getElementById('btn-cancel-item').onclick = () => closePanel('item');
 
+  document.getElementById('btn-close-password').onclick = () => closePanel('password');
+  document.getElementById('btn-cancel-password').onclick = () => closePanel('password');
+
   overlayEl.onclick = () => {
     closePanel('dirarc');
     closePanel('item');
+    closePanel('password');
   };
 
   document.getElementById('btn-save-dirarc').onclick = saveDirArc;
@@ -1577,6 +1700,74 @@
     }
   }
   slugEl.addEventListener('input', updateSlugPreview);
+
+  // Buscador
+  const itemsSearchEl = document.getElementById('items-search');
+  itemsSearchEl.addEventListener('input', () => {
+    currentSearchTerm = itemsSearchEl.value || '';
+    if (!currentDirArc) return;
+    renderItemsWithFilter();
+  });
+
+  // Menú usuario y cambio de contraseña
+  const userInfoEl = document.getElementById('user-info');
+  const userMenuEl = document.getElementById('user-menu');
+  userInfoEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userMenuEl.classList.toggle('open');
+  });
+  document.getElementById('menu-change-password').onclick = (e) => {
+    e.stopPropagation();
+    userMenuEl.classList.remove('open');
+    openPanel('password');
+  };
+  document.getElementById('menu-logout').onclick = async (e) => {
+    e.stopPropagation();
+    userMenuEl.classList.remove('open');
+    await supabase.auth.signOut();
+    setAuthUI(null);
+    const lr = document.getElementById('login-result');
+    lr.textContent = 'Sesión cerrada.';
+    lr.className = 'small ok';
+  };
+  document.addEventListener('click', (e) => {
+    if (!userMenuEl.contains(e.target) && e.target !== userInfoEl) {
+      userMenuEl.classList.remove('open');
+    }
+  });
+
+  document.getElementById('btn-save-password').onclick = async () => {
+    const newPass = document.getElementById('password-new').value.trim();
+    const confirmPass = document.getElementById('password-confirm').value.trim();
+    const resultEl = document.getElementById('password-result');
+
+    if (!newPass || !confirmPass) {
+      resultEl.textContent = 'Debes completar ambos campos.';
+      resultEl.className = 'small error';
+      return;
+    }
+    if (newPass !== confirmPass) {
+      resultEl.textContent = 'Las contraseñas no coinciden.';
+      resultEl.className = 'small error';
+      return;
+    }
+
+    if (!currentUser) {
+      resultEl.textContent = 'No hay sesión activa.';
+      resultEl.className = 'small error';
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPass }); // [web:473][web:489]
+    if (error) {
+      resultEl.textContent = 'Error al cambiar contraseña: ' + error.message;
+      resultEl.className = 'small error';
+      return;
+    }
+
+    resultEl.textContent = 'Contraseña actualizada. Es posible que debas volver a iniciar sesión.';
+    resultEl.className = 'small ok';
+  };
 
   loadSession();
   </script>
