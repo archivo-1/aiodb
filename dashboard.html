@@ -1227,6 +1227,12 @@ function inferMetaFromUrl(url) {
       actions.appendChild(btnCopy);
       actions.appendChild(btnShare);
       actions.appendChild(btnEdit);
+              const btnDelete = document.createElement('button');
+              btnDelete.className = 'icon secondary';
+              btnDelete.title = 'Borrar Aio Repo';
+              btnDelete.textContent = '🗑';
+              btnDelete.style.color = '#fca5a5';
+              actions.appendChild(btnDelete);
 
       main.appendChild(titleSpan);
       main.appendChild(actions);
@@ -1296,6 +1302,16 @@ function inferMetaFromUrl(url) {
         openDirArcEditor(d);
       };
 
+              btnDelete.onclick = async ev => {
+                          ev.stopPropagation();
+                          if (!confirm(`¿Borrar el Aio Repo "${d.title || d.slug}" y todos sus contenedores? Esta acción no se puede deshacer.`)) return;
+                          const { error: errItems } = await supabase.from('items').delete().eq('dirarc_id', d.id);
+                          if (errItems) { alert('Error borrando contenedores: ' + errItems.message); return; }
+                          const { error } = await supabase.from('dirarcs').delete().eq('id', d.id);
+                          if (error) { alert('Error borrando Aio Repo: ' + error.message); return; }
+                          if (currentDirArc && currentDirArc.id === d.id) { currentDirArc = null; resetDirArcUI(); }
+                          await loadDirArcs();
+                        };
       listEl.appendChild(li);
     });
   }
