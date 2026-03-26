@@ -423,7 +423,7 @@
   </header>
 
   <main>
-    <!-- Auth (solo se ve si no hay sesión) -->
+    <!-- Auth (solo sin sesión) -->
     <section id="auth-section">
       <h2 style="margin-top:0;">Acceso</h2>
       <div class="row">
@@ -454,9 +454,9 @@
       </div>
     </section>
 
-    <!-- Shell DirArcs + Contenedores -->
+    <!-- Shell principal -->
     <div id="app-shell" style="display:none;">
-      <!-- Columna Aio Repo (DirArc) -->
+      <!-- Columna Aio Repo -->
       <section id="dirarc-column">
         <div id="dirarc-header">
           <div>
@@ -487,10 +487,10 @@
     </div>
   </main>
 
-  <!-- Overlay para paneles -->
+  <!-- Overlay paneles -->
   <div id="panel-overlay" class="side-panel-overlay"></div>
 
-  <!-- Panel Crear/Editar Aio Repo -->
+  <!-- Panel Aio Repo -->
   <div id="panel-create-dirarc" class="side-panel">
     <div class="side-panel-header">
       <h3 id="dirarc-panel-title">Nuevo Aio Repo</h3>
@@ -521,7 +521,7 @@
     </div>
   </div>
 
-  <!-- Panel Crear/Editar Contenedor -->
+  <!-- Panel Contenedor -->
   <div id="panel-create-item" class="side-panel">
     <div class="side-panel-header">
       <h3 id="item-panel-title">Nuevo contenedor</h3>
@@ -590,6 +590,7 @@
 
   const SUPABASE_URL = 'https://zihojlqhxfxdjahgrbwy.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_TZeZu-g4BDlcdXOfWpUG_Q_rN-Sur8t';
+  const ARCHVISTA_BASE = 'https://archivo-1.github.io/aiorepo.c'; // base pública de ArchVista
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -598,8 +599,8 @@
   let dirarcsCache = [];
   let dirarcItemsCache = [];
 
-  let editingDirArc = null;   // objeto dirarc o null
-  let editingItem = null;     // objeto item o null
+  let editingDirArc = null;
+  let editingItem = null;
 
   // ---------- Utilidades URL / tipo ----------
   function normalizeExternalUrl(original) {
@@ -642,6 +643,45 @@
 
   function isStorage(url) {
     return /dropbox\.com|dl\.dropboxusercontent\.com|drive\.google\.com|supabase\.co/i.test(url);
+  }
+
+  function humanSourceLabel(url, categoria, useIframe) {
+    if (!url) return '';
+    let host = '';
+    try {
+      const u = new URL(url);
+      host = u.hostname.replace(/^www\./, '');
+    } catch {
+      return url;
+    }
+
+    if (isYoutube(url) || isVimeo(url) || categoria === 'yt/vm') {
+      const prefix = 'Video incrustado';
+      const service = host.includes('youtube') ? 'YouTube' : host.includes('vimeo') ? 'Vimeo' : host;
+      return `${prefix} – ${service}`;
+    }
+
+    if (host.includes('dropbox')) {
+      const parts = u.pathname.split('/');
+      const file = parts[parts.length - 1] || '';
+      const cleanFile = file.split('?')[0] || file;
+      return `${cleanFile || 'Archivo'} – Dropbox`;
+    }
+
+    if (host.includes('drive.google.com')) {
+      return 'Archivo – Google Drive';
+    }
+
+    if (host.includes('supabase.co')) {
+      return 'Archivo – Supabase Storage';
+    }
+
+    if (categoria === 'enlace' || categoria === 'enlaceEXT' || useIframe) {
+      const prefix = categoria === 'enlace' || useIframe ? 'Contenido incrustado' : 'Enlace externo';
+      return `${prefix} – ${host}`;
+    }
+
+    return url;
   }
 
   function inferMetaFromUrl(url) {
@@ -743,7 +783,7 @@
       newItemBtn.style.display = 'none';
       resetDirArcUI();
     } else {
-      authSection.style.display = 'none'; // se oculta al tener sesión
+      authSection.style.display = 'none';
       appShell.style.display = 'flex';
       btnLogout.style.display = '';
       userInfo.style.display = 'inline-flex';
@@ -815,7 +855,7 @@
     lr.className = 'small ok';
   };
 
-  // ---------- DirArcs (Aio Repo) ----------
+  // ---------- Aio Repo ----------
   async function loadDirArcs() {
     const listEl = document.getElementById('dirarc-list');
     const resultEl = document.getElementById('dirarc-list-result');
@@ -884,13 +924,18 @@
 
       const btnVisit = document.createElement('button');
       btnVisit.className = 'icon secondary';
-      btnVisit.title = 'Abrir Aio Repo';
+      btnVisit.title = 'Abrir en ArchVista';
       btnVisit.textContent = '↗';
 
       const btnCopy = document.createElement('button');
       btnCopy.className = 'icon secondary';
       btnCopy.title = 'Copiar enlace';
       btnCopy.textContent = '⧉';
+
+      const btnShare = document.createElement('button');
+      btnShare.className = 'icon secondary';
+      btnShare.title = 'Compartir';
+      btnShare.textContent = '⤴';
 
       const btnEdit = document.createElement('button');
       btnEdit.className = 'icon secondary';
@@ -899,6 +944,7 @@
 
       actions.appendChild(btnVisit);
       actions.appendChild(btnCopy);
+      actions.appendChild(btnShare);
       actions.appendChild(btnEdit);
 
       main.appendChild(titleSpan);
@@ -932,19 +978,36 @@
         li.classList.add('active');
       }
 
-      // evitar que los botones cambien la selección
+      const fullUrl = `${ARCHVISTA_BASE}/index.html?slugDirArc=${encodeURIComponent(d.slug)}`;
+
       btnVisit.onclick = ev => {
         ev.stopPropagation();
-        const url = `index.html?slugDirArc=${encodeURIComponent(d.slug)}`;
-        window.open(url, '_blank');
+        window.open(fullUrl, '_blank');
       };
       btnCopy.onclick = async ev => {
         ev.stopPropagation();
-        const url = `index.html?slugDirArc=${encodeURIComponent(d.slug)}`;
         try {
-          await navigator.clipboard.writeText(url); // [web:424][web:425]
+          await navigator.clipboard.writeText(fullUrl); // [web:424][web:448]
         } catch (err) {
           console.warn('No se pudo copiar al portapapeles', err);
+        }
+      };
+      btnShare.onclick = async ev => {
+        ev.stopPropagation();
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: d.title || 'Aio Repo',
+              text: d.description || 'Aio Repo en ArchVista',
+              url: fullUrl
+            }); // [web:439][web:442]
+          } catch (err) {
+            console.warn('Error al compartir', err);
+          }
+        } else {
+          try {
+            await navigator.clipboard.writeText(fullUrl);
+          } catch {}
         }
       };
       btnEdit.onclick = ev => {
@@ -1123,7 +1186,7 @@
         const main = document.createElement('div');
         main.className = 'item-main';
 
-        const meta = inferMetaFromUrl(it.archivo || it.resolved_url || '');
+        const meta = classifyUrlForMedia(it.archivo || it.resolved_url || '', it.categoria === 'enlace');
         const icon = document.createElement('div');
         icon.className = 'item-icon';
         icon.textContent = (meta.icon || '●');
@@ -1137,7 +1200,7 @@
 
         const urlSpan = document.createElement('div');
         urlSpan.className = 'item-url';
-        urlSpan.textContent = it.archivo;
+        urlSpan.textContent = humanSourceLabel(it.archivo, it.categoria, it.categoria === 'enlace');
 
         textWrap.appendChild(nameSpan);
         textWrap.appendChild(urlSpan);
@@ -1150,13 +1213,18 @@
 
         const btnVisit = document.createElement('button');
         btnVisit.className = 'icon secondary';
-        btnVisit.title = 'Abrir en visor';
+        btnVisit.title = 'Abrir en ArchVista';
         btnVisit.textContent = '↗';
 
         const btnCopy = document.createElement('button');
         btnCopy.className = 'icon secondary';
         btnCopy.title = 'Copiar enlace visor';
         btnCopy.textContent = '⧉';
+
+        const btnShare = document.createElement('button');
+        btnShare.className = 'icon secondary';
+        btnShare.title = 'Compartir';
+        btnShare.textContent = '⤴';
 
         const btnEdit = document.createElement('button');
         btnEdit.className = 'icon secondary';
@@ -1170,29 +1238,45 @@
 
         actions.appendChild(btnVisit);
         actions.appendChild(btnCopy);
+        actions.appendChild(btnShare);
         actions.appendChild(btnEdit);
         actions.appendChild(btnDelete);
 
-        // acciones
+        const slugParam = currentDirArc.slug;
+        const extra = slugParam ? `&slugDirArc=${encodeURIComponent(slugParam)}` : '';
+        const visor = it.visor || meta.visor || 'media';
+        const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponent(it.item_id)}${extra}`;
+
         btnVisit.onclick = ev => {
           ev.stopPropagation();
-          const slugParam = currentDirArc.slug;
-          const extra = slugParam ? `&slugDirArc=${encodeURIComponent(slugParam)}` : '';
-          const visor = it.visor || 'media';
-          const url = `viewer-${visor}.html?id=${encodeURIComponent(it.item_id)}${extra}`;
-          window.open(url, '_blank');
+          window.open(viewerUrl, '_blank');
         };
 
         btnCopy.onclick = async ev => {
           ev.stopPropagation();
-          const slugParam = currentDirArc.slug;
-          const extra = slugParam ? `&slugDirArc=${encodeURIComponent(slugParam)}` : '';
-          const visor = it.visor || 'media';
-          const url = `viewer-${visor}.html?id=${encodeURIComponent(it.item_id)}${extra}`;
           try {
-            await navigator.clipboard.writeText(url); // [web:424][web:434]
+            await navigator.clipboard.writeText(viewerUrl); // [web:424][web:448]
           } catch (err) {
             console.warn('No se pudo copiar enlace', err);
+          }
+        };
+
+        btnShare.onclick = async ev => {
+          ev.stopPropagation();
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: it.nombre || 'Contenedor ArchVista',
+                text: it.descripcion || 'Contenido en ArchVista',
+                url: viewerUrl
+              }); // [web:439][web:443]
+            } catch (err) {
+              console.warn('Error al compartir', err);
+            }
+          } else {
+            try {
+              await navigator.clipboard.writeText(viewerUrl);
+            } catch {}
           }
         };
 
@@ -1393,7 +1477,7 @@
     openPanel('item');
   }
 
-  // ---------- Paneles laterales ----------
+  // ---------- Paneles ----------
   const overlayEl = document.getElementById('panel-overlay');
   const panelDirArcEl = document.getElementById('panel-create-dirarc');
   const panelItemEl = document.getElementById('panel-create-item');
