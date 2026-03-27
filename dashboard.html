@@ -1731,15 +1731,15 @@ function inferMetaFromUrl(url) {
     return;
   }
 
-  const isStor = isStorage(url);
-  const isYT = isYoutube(url) || isVimeo(url);
+  const isStor  = isStorage(url);
+  const isYT    = isYoutube(url) || isVimeo(url);
   const isGDocs = /^https?:\/\/docs\.google\.com\//i.test(url);
 
   if (isYT || isStor || isGDocs) {
     // YouTube/Vimeo, storage (Dropbox/Drive/Supabase) o Google Docs/Sheets/Slides:
     // no mostramos la opción de iframe manual.
     iframeOptionsEl.style.display = 'none';
-  } else if (/^https?:\/\/\//i.test(url)) {
+  } else if (/^https?:\/\//i.test(url)) {
     // Sitio externo genérico: dejamos elegir iframe o no.
     iframeOptionsEl.style.display = 'block';
   } else {
@@ -1749,6 +1749,7 @@ function inferMetaFromUrl(url) {
   const meta = classifyUrlForMedia(url, useIframe);
   typePreviewEl.textContent = `Se detectará como visor “${meta.visor}” y categoría “${meta.categoria}”.`;
 }
+
 
   archivoInputEl.addEventListener('input', updateTypePreview);
   useIframeEl.addEventListener('change', updateTypePreview);
