@@ -1676,11 +1676,6 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
           }
         };
 
-        btnEdit.onclick = ev => {
-          ev.stopPropagation();
-          openItemEditor(it);
-        };
-
                 btnDelete.onclick = async ev => {
           ev.stopPropagation();
 
@@ -1695,7 +1690,7 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
           const { error } = await supabase
             .from('items')
             .delete()
-            .eq('id', it.id); // usar id (uuid), no item_id
+            .eq('id', it.id); // usar id (uuid)
 
           btnDelete.disabled = false;
 
@@ -1706,10 +1701,8 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
           }
 
           await loadDirArcItems();
-        };
+        };  // <- aquí se cierra solo el handler de delete
 
-          await loadDirArcItems();
-        };
         line.appendChild(main);
         line.appendChild(actions);
         groupDiv.appendChild(line);
@@ -1848,7 +1841,7 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
           thumbnail: meta.thumbnail,
           ui_config: uiConfig
         })
-        .eq('id', editingItem.id);
+        .eq('id', editingItem.id); // usar id (uuid)
       error = resp.error;
     } else {
       const resp = await supabase.from('items').insert({
