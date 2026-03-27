@@ -1763,12 +1763,26 @@ function inferMetaFromUrl(url) {
     }
 
     const nombre = document.getElementById('item-nombre').value.trim();
-    const coleccion = document.getElementById('item-coleccion-input').value.trim();
-    const archivo = document.getElementById('item-archivo').value.trim();
-    const descripcion = document.getElementById('item-descripcion').value.trim();
-    const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
-    const useIframe = document.getElementById('item-use-iframe').checked;
-    const btn = document.getElementById('btn-save-item');
+const coleccion = document.getElementById('item-coleccion-input').value.trim();
+let archivoRaw = document.getElementById('item-archivo').value.trim();
+const descripcion = document.getElementById('item-descripcion').value.trim();
+const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
+const useIframe = document.getElementById('item-use-iframe').checked;
+const btn = document.getElementById('btn-save-item');
+
+// Normalización especial: si el usuario pegó un <iframe> de Google,
+// extraemos solo el src="https://docs.google.com/...."
+function extractGoogleEmbedSrc(htmlOrUrl) {
+  const text = htmlOrUrl || '';
+  const m = text.match(/src=["'](https?:\/\/docs\.google\.com\/[^"']+)["']/i);
+  if (m && m[1]) {
+    return m[1];
+  }
+  return htmlOrUrl;
+}
+
+archivoRaw = extractGoogleEmbedSrc(archivoRaw);
+const archivo = archivoRaw;
 
     if (!nombre || !coleccion || !archivo) {
       resultEl.textContent = 'Nombre, colección y archivo/enlace son obligatorios.';
