@@ -1695,7 +1695,7 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
           const { error } = await supabase
             .from('items')
             .delete()
-            .eq('item_id', it.item_id);
+            .eq('id', it.item_id);
 
           btnDelete.disabled = false;
 
@@ -1845,7 +1845,7 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
           thumbnail: meta.thumbnail,
           ui_config: uiConfig
         })
-        .eq('item_id', editingItem.item_id);
+        .eq('id', editingItem.item_id);
       error = resp.error;
     } else {
       const resp = await supabase.from('items').insert({
