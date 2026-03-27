@@ -878,6 +878,16 @@ function inferMetaFromUrl(url) {
     };
   }
 
+  // Markdown / código (.md)
+  if (lower.endsWith('.md')) {
+    return {
+      visor: 'media',          // viewer-media.html
+      categoria: 'md',
+      thumbnail: 'thumbnails/gt_md.png', // icono especial para código/markdown
+      icon: 'MD'
+    };
+  }
+
   // ---------------------------------------------------------------------------
   // 2) Modelos 3D / BIM
   // ---------------------------------------------------------------------------
@@ -997,6 +1007,7 @@ function inferMetaFromUrl(url) {
   function classifyUrlForMedia(originalUrl, useIframeFlag) {
     const url = (originalUrl || '').trim();
 
+    // YouTube / Vimeo embebidos
     if (isYoutube(url) || isVimeo(url)) {
       return {
         visor: 'media',
@@ -1006,10 +1017,53 @@ function inferMetaFromUrl(url) {
       };
     }
 
+    // Google Docs / Sheets / Slides (enlaces de "publicar en web")
+    if (/^https?:\/\/docs\.google\.com\//i.test(url)) {
+      // Usamos la ruta para distinguir tipos
+      const path = new URL(url).pathname || '';
+
+      if (path.startsWith('/document/')) {
+        // Google Doc publicado
+        return {
+          visor: 'media',
+          categoria: 'gdoc',
+          thumbnail: 'thumbnails/gt_gdoc.png',
+          icon: 'Gd'
+        };
+      }
+
+      if (path.startsWith('/spreadsheets/')) {
+        // Google Sheet publicado
+        return {
+          visor: 'media',
+          categoria: 'gsheet',
+          thumbnail: 'thumbnails/gt_gsheet.png',
+          icon: 'Gs'
+        };
+      }
+
+      if (path.startsWith('/presentation/')) {
+        // Google Slide publicado
+        return {
+          visor: 'media',
+          categoria: 'gslide',
+          thumbnail: 'thumbnails/gt_gslide.png',
+          icon: 'Gp'
+        };
+      }
+
+      // Cualquier otro docs.google.com desconocido → tratamos como enlace incrustado
+      return {
+        visor: 'media',
+        categoria: 'enlace',
+        thumbnail: 'thumbnails/gt_WEB.png',
+        icon: '↗'
+      };
+    }
+
     if (isStorage(url)) {
       return inferMetaFromUrl(url);
     }
-
     if (/^https?:\/\//i.test(url) === false) {
       return { visor: 'media', categoria: 'otro', thumbnail: 'thumbnails/gt_0.png', icon: '●' };
     }
