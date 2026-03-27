@@ -1681,15 +1681,23 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
           openItemEditor(it);
         };
 
-        btnDelete.onclick = async ev => {
+               btnDelete.onclick = async ev => {
           ev.stopPropagation();
+
+          // Evitar dobles clics mientras se borra
+          if (btnDelete.disabled) return;
+
           const ok = confirm(`¿Borrar el contenedor ${it.item_id}?`);
           if (!ok) return;
+
+          btnDelete.disabled = true;
 
           const { error } = await supabase
             .from('items')
             .delete()
             .eq('item_id', it.item_id);
+
+          btnDelete.disabled = false;
 
           if (error) {
             console.error(error);
@@ -1699,7 +1707,6 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
 
           await loadDirArcItems();
         };
-
         line.appendChild(main);
         line.appendChild(actions);
         groupDiv.appendChild(line);
@@ -1757,6 +1764,10 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
 
   async function saveItem() {
     const resultEl = document.getElementById('item-result');
+    const btn = document.getElementById('btn-save-item');
+
+    // Evitar dobles clics si ya hay un guardado en curso
+    if (btn.disabled) return;
 
     if (!currentUser || !currentDirArc) {
       resultEl.textContent = 'Debes iniciar sesión y seleccionar un Aio Repo primero.';
@@ -1765,26 +1776,25 @@ const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponen
     }
 
     const nombre = document.getElementById('item-nombre').value.trim();
-const coleccion = document.getElementById('item-coleccion-input').value.trim();
-let archivoRaw = document.getElementById('item-archivo').value.trim();
-const descripcion = document.getElementById('item-descripcion').value.trim();
-const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
-const useIframe = document.getElementById('item-use-iframe').checked;
-const btn = document.getElementById('btn-save-item');
+    const coleccion = document.getElementById('item-coleccion-input').value.trim();
+    let archivoRaw = document.getElementById('item-archivo').value.trim();
+    const descripcion = document.getElementById('item-descripcion').value.trim();
+    const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
+    const useIframe = document.getElementById('item-use-iframe').checked;
 
-// Normalización especial: si el usuario pegó un <iframe> de Google,
-// extraemos solo el src="https://docs.google.com/...."
-function extractGoogleEmbedSrc(htmlOrUrl) {
-  const text = htmlOrUrl || '';
-  const m = text.match(/src=["'](https?:\/\/docs\.google\.com\/[^"']+)["']/i);
-  if (m && m[1]) {
-    return m[1];
-  }
-  return htmlOrUrl;
-}
+    // Normalización especial: si el usuario pegó un <iframe> de Google,
+    // extraemos solo el src="https://docs.google.com/...."
+    function extractGoogleEmbedSrc(htmlOrUrl) {
+      const text = htmlOrUrl || '';
+      const m = text.match(/src=["'](https?:\/\/docs\.google\.com\/[^"']+)["']/i);
+      if (m && m[1]) {
+        return m[1];
+      }
+      return htmlOrUrl;
+    }
 
-archivoRaw = extractGoogleEmbedSrc(archivoRaw);
-const archivo = archivoRaw;
+    archivoRaw = extractGoogleEmbedSrc(archivoRaw);
+    const archivo = archivoRaw;
 
     if (!nombre || !coleccion || !archivo) {
       resultEl.textContent = 'Nombre, colección y archivo/enlace son obligatorios.';
