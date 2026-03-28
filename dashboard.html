@@ -531,6 +531,9 @@
         <div class="user-menu-item" id="menu-logout">
           Cerrar sesión
         </div>
+        <div class="user-menu-item danger" id="menu-delete-account">
+          Eliminar cuenta
+        </div>
       </div>
       <!-- Botón de respaldo para cerrar sesión -->
       <button id="btn-logout" class="secondary" style="display:none;">Cerrar sesión</button>
@@ -1706,7 +1709,7 @@ function inferMetaFromUrl(url) {
 
           await loadDirArcItems();
         };
-        
+
         line.appendChild(main);
         line.appendChild(actions);
         groupDiv.appendChild(line);
@@ -2036,6 +2039,49 @@ function inferMetaFromUrl(url) {
     lr.textContent = 'Sesión cerrada.';
     lr.className = 'small ok';
   };
+    document.getElementById('menu-delete-account').onclick = async (e) => {
+    e.stopPropagation();
+    userMenuEl.classList.remove('open');
+
+    const first = confirm(
+      'Esto eliminará tu cuenta de Aio Dashboard y TODOS tus Aio Repo y contenedores. ' +
+      'Esta acción es irreversible. ¿Continuar?'
+    );
+    if (!first) return;
+
+    const second = confirm('¿Seguro que quieres eliminar definitivamente tu cuenta y datos?');
+    if (!second) return;
+
+    const loginResult = document.getElementById('login-result');
+    loginResult.textContent = 'Eliminando cuenta...';
+    loginResult.className = 'small';
+
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-account', {
+        body: {}, // el JWT va en el header automáticamente
+      });
+
+      if (error || !data?.ok) {
+        console.error(error || data);
+        loginResult.textContent =
+          'Error al eliminar cuenta: ' + (error?.message || data?.error || 'desconocido');
+        loginResult.className = 'small error';
+        return;
+      }
+
+      await supabase.auth.signOut();
+      setAuthUI(null);
+      loginResult.textContent = 'Cuenta y datos eliminados. Hasta pronto.';
+      loginResult.className = 'small ok';
+    } catch (err) {
+      console.error(err);
+      loginResult.textContent = 'Error inesperado al eliminar la cuenta.';
+      loginResult.className = 'small error';
+    }
+  };
+
+
+
   document.addEventListener('click', (e) => {
     if (!userMenuEl.contains(e.target) && e.target !== userInfoEl) {
       userMenuEl.classList.remove('open');
