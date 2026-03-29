@@ -748,34 +748,46 @@
 
   // ---------- Utilidades URL / tipo ----------
   function normalizeExternalUrl(original) {
-    try {
-      const url = new URL(original);
+  try {
+    const url = new URL(original);
 
-      if (url.hostname.includes('dropbox.com')) {
-        url.hostname = 'dl.dropboxusercontent.com';
-        url.searchParams.set('raw', '1');
-        url.searchParams.delete('dl');
+    if (url.hostname.includes('dropbox.com')) {
+      url.hostname = 'dl.dropboxusercontent.com';
+      url.searchParams.set('raw', '1');
+      url.searchParams.delete('dl');
+      return url.toString();
+    }
+
+    if (url.hostname.includes('drive.google.com')) {
+      const m = url.pathname.match(/\/file\/d\/([^/]+)\/view/);
+      if (m && m[1]) {
+        const fileId = m[1];
+        return `https://drive.google.com/uc?export=download&id=${fileId}`;
+      }
+      if (url.pathname.startsWith('/uc')) {
+        url.searchParams.set('export', 'download');
         return url.toString();
       }
-
-      if (url.hostname.includes('drive.google.com')) {
-        const m = url.pathname.match(/\/file\/d\/([^/]+)\/view/);
-        if (m && m[1]) {
-          const fileId = m[1];
-          return `https://drive.google.com/uc?export=download&id=${fileId}`;
-        }
-        if (url.pathname.startsWith('/uc')) {
-          url.searchParams.set('export', 'download');
-          return url.toString();
-        }
-        return original;
-      }
-
-      return original;
-    } catch {
       return original;
     }
+
+    if (url.hostname === 'github.com') {
+      const parts = url.pathname.split('/');
+      // /user/repo/blob/branch/path/file.ext
+      if (parts.length >= 6 && parts[3] === 'blob') {
+        const user = parts[1];
+        const repo = parts[2];
+        const branch = parts[4];
+        const filePath = parts.slice(5).join('/');
+        return `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${filePath}`;
+      }
+    }
+
+    return original;
+  } catch {
+    return original;
   }
+}
 
   function isYoutube(url) {
     return /youtube\.com\/watch\?v=|youtu\.be\//i.test(url);
@@ -786,8 +798,8 @@
   }
 
   function isStorage(url) {
-    return /dropbox\.com|dl\.dropboxusercontent\.com|drive\.google\.com|supabase\.co/i.test(url);
-  }
+  return /dropbox\.com|dl\.dropboxusercontent\.com|drive\.google\.com|supabase\.co|raw\.githubusercontent\.com/i.test(url);
+}
 
   function humanSourceLabel(url, categoria, useIframe) {
   if (!url) return '';
@@ -838,6 +850,13 @@
 
   if (host.includes('supabase.co')) {
     return 'Archivo – Supabase Storage';
+  }
+
+  if (host === 'raw.githubusercontent.com' || host === 'github.com') {
+    const parts = (u.pathname || '').split('/');
+    const file = parts[parts.length - 1] || '';
+    const cleanFile = file.split('?')[0] || file;
+    return `${cleanFile || 'Archivo'} – GitHub raw`;
   }
 
   if (categoria === 'enlace' || categoria === 'enlaceEXT' || useIframe) {
