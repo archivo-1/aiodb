@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Raw URL Converter</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+            --primary-color: #2da44e;
+            --primary-hover: #2c974b;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input[type="url"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-convert {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-convert:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-copy {
+            background-color: #e1e4e8;
+            color: #24292e;
+        }
+
+        .btn-copy:hover {
+            background-color: #d1d5da;
+        }
+
+        .error-msg {
+            color: #cb2431;
+            font-size: 0.85rem;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>GitHub Raw Link Converter</h2>
+        
+        <label for="inputUrl">Original GitHub URL</label>
+        <input type="url" id="inputUrl" placeholder="https://github.com/user/repo/blob/main/file.ext" autofocus>
+        <div id="errorMsg" class="error-msg">Invalid GitHub file URL format.</div>
+
+        <label for="outputUrl">Raw URL</label>
+        <input type="text" id="outputUrl" readonly placeholder="Result will appear here...">
+
+        <div class="button-group">
+            <button class="btn-convert" onclick="convertUrl()">Convert</button>
+            <button class="btn-copy" onclick="copyToClipboard()" id="copyBtn">Copy Link</button>
+        </div>
+    </div>
+
+    <script>
+        function convertUrl() {
+            const inputUrl = document.getElementById('inputUrl').value.trim();
+            const outputEl = document.getElementById('outputUrl');
+            const errorEl = document.getElementById('errorMsg');
+            const copyBtn = document.getElementById('copyBtn');
+            
+            // Reset UI
+            errorEl.style.display = 'none';
+            copyBtn.textContent = 'Copy Link';
+
+            if (!inputUrl) return;
+
+            try {
+                const url = new URL(inputUrl);
+
+                // Check if it's a standard github.com link
+                if (url.hostname !== 'github.com') {
+                    throw new Error('Not a github.com URL');
+                }
+
+                // Regex to match: /username/repository/blob/branch/path/to/file
+                const regex = /^\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/;
+                const match = url.pathname.match(regex);
+
+                if (match) {
+                    const user = match[1];
+                    const repo = match[2];
+                    const branch = match[3];
+                    const filePath = match[4];
+
+                    // Construct the raw URL format requested
+                    const rawUrl = `https://raw.githubusercontent.com/${user}/${repo}/refs/heads/${branch}/${filePath}`;
+                    outputEl.value = rawUrl;
+                } else {
+                    throw new Error('Pattern mismatch');
+                }
+            } catch (e) {
+                errorEl.style.display = 'block';
+                outputEl.value = '';
+            }
+        }
+
+        function copyToClipboard() {
+            const outputEl = document.getElementById('outputUrl');
+            const copyBtn = document.getElementById('copyBtn');
+
+            if (outputEl.value) {
+                // Modern clipboard API
+                navigator.clipboard.writeText(outputEl.value).then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copy Link';
+                    }, 2000);
+                }).catch(err => {
+                    alert('Failed to copy text: ', err);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
