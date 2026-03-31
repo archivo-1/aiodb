@@ -513,6 +513,362 @@
         min-width: 0;
       }
     }
+    /* =========================
+   APPS DOCK
+========================= */
+
+.apps-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 1200;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 10px;
+  border-radius: 14px;
+
+  background: rgba(22, 22, 24, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.app-dock-btn {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #f2f2f2;
+  cursor: pointer;
+}
+
+.app-dock-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-dock-btn:focus-visible {
+  outline: 2px solid #7fb3ff;
+  outline-offset: 2px;
+}
+
+.app-dock-icon {
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 600;
+  user-select: none;
+  pointer-events: none;
+}
+
+.app-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+
+  padding: 5px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+
+  font-size: 12px;
+  line-height: 1;
+  color: #fff;
+  background: rgba(18, 18, 20, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.app-dock-btn:hover .app-tooltip,
+.app-dock-btn:focus-visible .app-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.app-dock-btn.is-hidden {
+  display: none;
+}
+
+.app-dock-indicator {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  opacity: 0;
+  transition: opacity 140ms ease, transform 140ms ease;
+  pointer-events: none;
+}
+
+.app-dock-btn.is-running .app-dock-indicator {
+  opacity: 1;
+}
+
+.app-dock-btn.is-active .app-dock-indicator {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.15);
+  background: #ffffff;
+}
+
+/* =========================
+   APP WINDOW
+========================= */
+
+.app-overlay[hidden] {
+  display: none !important;
+}
+
+.app-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+  background: rgba(10, 10, 12, 0.32);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.app-window {
+  width: min(1040px, 92vw);
+  height: min(720px, 86vh);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  border-radius: 16px;
+  background: #151518;
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+}
+
+.app-window-bar {
+  height: 48px;
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 12px 0 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.app-window-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-window-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-window-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f1f1;
+}
+
+.app-window-close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #f1f1f1;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app-window-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-window-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: #111214;
+}
+
+.app-placeholder {
+  padding: 24px;
+}
+
+.app-placeholder h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.app-placeholder p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.app-window-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-window-minimize,
+.app-window-close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #f1f1f1;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.app-window-minimize:hover,
+.app-window-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-switch-confirm[hidden] {
+  display: none !important;
+}
+
+.app-switch-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.38);
+  backdrop-filter: blur(6px);
+  padding: 16px;
+}
+
+.app-switch-card {
+  width: min(360px, 100%);
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+  padding: 18px;
+  color: #e5e7eb;
+}
+
+.app-switch-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.app-switch-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #94a3b8;
+  margin: 0 0 14px 0;
+}
+
+.app-switch-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.app-switch-btn {
+  min-width: 88px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-switch-btn.secondary {
+  background: rgba(148, 163, 184, 0.12);
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.app-switch-btn.primary {
+  background: #e5e7eb;
+  color: #0f172a;
+}
+
+.apps-dock[hidden] {
+  display: none !important;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+  .apps-dock {
+    bottom: 8px;
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .app-dock-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .app-window {
+    width: 100vw;
+    height: 88vh;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .app-tooltip {
+    display: none;
+  }
+}
     /* --- FIN: Correcciones exclusivas para móviles --- */
   </style>
 </head>
@@ -728,7 +1084,78 @@
     </div>
   </div>
 
-  <script type="module">
+  <!-- =========================
+     APPS DOCK
+========================= -->
+<div id="apps-dock" class="apps-dock" aria-label="Apps">
+  <button class="app-dock-btn" data-app-id="arc-editor" aria-label="ARC Editor">
+    <span class="app-dock-icon">E</span>
+    <span class="app-dock-indicator"></span>
+    <span class="app-tooltip">Editor ARC</span>
+  </button>
+
+  <button class="app-dock-btn" data-app-id="local-preview" aria-label="Local Preview">
+    <span class="app-dock-icon">V</span>
+    <span class="app-dock-indicator"></span>
+    <span class="app-tooltip">Visor Aio</span>
+  </button>
+
+  <button class="app-dock-btn" data-app-id="link-assistant" aria-label="Link Assistant">
+    <span class="app-dock-icon">A</span>
+    <span class="app-dock-indicator"></span>
+    <span class="app-tooltip">Asistente URL</span>
+  </button>
+
+  <button class="app-dock-btn" data-app-id="quick-start" aria-label="Quick Start">
+    <span class="app-dock-icon">G</span>
+    <span class="app-dock-indicator"></span>
+    <span class="app-tooltip">Guía de inicio rápido</span>
+  </button>
+
+  <!-- Hidden future app -->
+  <button class="app-dock-btn is-hidden" data-app-id="theme-lab" aria-label="Theme Lab">
+    <span class="app-dock-icon">T</span>
+    <span class="app-tooltip">Theme Lab</span>
+  </button>
+</div>
+
+<!-- =========================
+     APP OVERLAY + WINDOW
+========================= -->
+<div id="app-overlay" class="app-overlay" hidden>
+  <div class="app-window" role="dialog" aria-modal="true" aria-labelledby="app-window-title">
+    <div class="app-window-bar">
+      <div class="app-window-meta">
+        <span id="app-window-icon" class="app-window-icon">A</span>
+        <span id="app-window-title" class="app-window-title">App</span>
+      </div>
+
+      <div class="app-window-actions">
+        <button id="app-window-minimize" class="app-window-minimize" aria-label="Minimizar app">
+          —
+        </button>
+        <button id="app-window-close" class="app-window-close" aria-label="Cerrar app">
+          ×
+        </button>
+      </div>
+    </div>
+
+    <div id="app-window-body" class="app-window-body"></div>
+  </div>
+</div>
+
+<div id="app-switch-confirm" class="app-switch-confirm" hidden>
+  <div class="app-switch-card" role="dialog" aria-modal="true" aria-labelledby="app-switch-title">
+    <div id="app-switch-title" class="app-switch-title">¿Cerrar app en ejecución?</div>
+    <p class="app-switch-text">Se perderán los cambios.</p>
+    <div class="app-switch-actions">
+      <button id="app-switch-cancel" class="app-switch-btn secondary">Volver</button>
+      <button id="app-switch-ok" class="app-switch-btn primary">OK</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
   const SUPABASE_URL = 'https://zihojlqhxfxdjahgrbwy.supabase.co';
@@ -736,6 +1163,8 @@
   const ARCHVISTA_BASE = 'https://archivo-1.github.io/aiorepo.c';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+ 
 
   let currentUser = null;
   let currentDirArc = null;
@@ -745,6 +1174,7 @@
 
   let editingDirArc = null;
   let editingItem = null;
+
 
   // ---------- Utilidades URL / tipo ----------
   function normalizeExternalUrl(original) {
@@ -1139,42 +1569,45 @@ function inferMetaFromUrl(url) {
     }
   }
 
-  function setAuthUI(user) {
-    const authSection = document.getElementById('auth-section');
-    const appShell = document.getElementById('app-shell');
-    const btnLogout = document.getElementById('btn-logout');
-    const userInfo = document.getElementById('user-info');
-    const newItemBtn = document.getElementById('btn-open-create-item-panel');
+ function setAuthUI(user) {
+  const authSection = document.getElementById('auth-section');
+  const appShell = document.getElementById('app-shell');
+  const btnLogout = document.getElementById('btn-logout');
+  const userInfo = document.getElementById('user-info');
+  const newItemBtn = document.getElementById('btn-open-create-item-panel');
 
-    currentUser = user;
+  currentUser = user;
 
-    if (!user) {
-      authSection.style.display = '';
-      appShell.style.display = 'none';
-      btnLogout.style.display = 'none';
-      userInfo.style.display = 'none';
-      newItemBtn.style.display = 'none';
-      resetDirArcUI();
-    } else {
-      authSection.style.display = 'none';
-      appShell.style.display = 'flex';
-      btnLogout.style.display = '';
-      userInfo.style.display = 'inline-flex';
-      userInfo.textContent = user.email || user.id;
-      resetDirArcUI();
-      loadDirArcs();
-    }
+  if (!user) {
+    authSection.style.display = '';
+    appShell.style.display = 'none';
+    btnLogout.style.display = 'none';
+    userInfo.style.display = 'none';
+    newItemBtn.style.display = 'none';
+    resetDirArcUI();
+  } else {
+    authSection.style.display = 'none';
+    appShell.style.display = 'flex';
+    btnLogout.style.display = '';
+    userInfo.style.display = 'inline-flex';
+    userInfo.textContent = user.email || user.id;
+    resetDirArcUI();
+    loadDirArcs();
   }
 
-  async function loadSession() {
-    const { data, error } = await supabase.auth.getUser();
-    if (error) {
-      console.warn('Error obteniendo usuario:', error.message);
-      setAuthUI(null);
-      return;
-    }
-    setAuthUI(data.user || null);
+  syncAppsDockVisibility();
+}
+
+async function loadSession() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.warn('Error obteniendo usuario:', error.message);
+    setAuthUI(null);
+    return;
   }
+
+  setAuthUI(data.user || null);
+}
 
   // ---------- Auth ----------
   document.getElementById('btn-signup').onclick = async () => {
@@ -2139,7 +2572,308 @@ function inferMetaFromUrl(url) {
     resultEl.textContent = 'Contraseña actualizada. Es posible que debas volver a iniciar sesión.';
     resultEl.className = 'small ok';
   };
+// APPS REGISTRY / WINDOW
+const appsRegistry = {
+  'arc-editor': {
+    title: 'Editor ARC',
+    icon: 'E',
+    type: 'iframe',
+    src: 'https://archivo-1.github.io/aiodb/apps/aioeditor.html'
+  },
+  'local-preview': {
+    title: 'Visor Aio',
+    icon: 'V',
+    type: 'iframe',
+    src: 'https://archivo-1.github.io/aiodb/apps/aio-viewers.html'
+  },
+  'link-assistant': {
+    title: 'Asistente URL',
+    icon: 'A',
+    type: 'iframe',
+    src: 'https://archivo-1.github.io/aiodb/apps/arcnavi.html'
+  },
+  'quick-start': {
+    title: 'Guía de inicio',
+    icon: 'G',
+    type: 'iframe',
+    src: 'https://archivo-1.github.io/aiorepo.c/index.html?slugDirArc=aiorepo'
+  },
+  'theme-lab': {
+    title: 'Theme Lab',
+    icon: 'T',
+    type: 'hidden',
+    content: `<div class="app-placeholder"><h3>Theme Lab</h3><p>Herramienta futura oculta.</p></div>`
+  }
+};
 
+const appOverlayEl = document.getElementById('app-overlay');
+const appWindowBodyEl = document.getElementById('app-window-body');
+const appWindowTitleEl = document.getElementById('app-window-title');
+const appWindowIconEl = document.getElementById('app-window-icon');
+const appWindowCloseEl = document.getElementById('app-window-close');
+const appWindowMinimizeEl = document.getElementById('app-window-minimize');
+const appDockButtons = document.querySelectorAll('.app-dock-btn[data-app-id]');
+const appsDockEl = document.getElementById('apps-dock');
+
+const appSwitchConfirmEl = document.getElementById('app-switch-confirm');
+const appSwitchOkEl = document.getElementById('app-switch-ok');
+const appSwitchCancelEl = document.getElementById('app-switch-cancel');
+
+let currentOpenAppId = null;
+let minimizedAppId = null;
+let currentAppInstance = null;
+let pendingOpenAppId = null;
+let appTransitionLock = false;
+
+function createAppInstance(appId) {
+  const app = appsRegistry[appId];
+  if (!app || app.type === 'hidden') return null;
+
+  const mountEl = document.createElement('div');
+  mountEl.className = 'app-instance-host';
+  mountEl.dataset.appId = appId;
+  mountEl.style.display = 'block';
+  mountEl.style.width = '100%';
+  mountEl.style.height = '100%';
+  mountEl.style.background = '#111214';
+
+  let iframeEl = null;
+
+  if (app.type === 'iframe' && app.src) {
+    iframeEl = document.createElement('iframe');
+    iframeEl.src = app.src;
+    iframeEl.title = app.title || 'App';
+    iframeEl.loading = 'eager';
+    iframeEl.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframeEl.allow = 'clipboard-read; clipboard-write';
+    iframeEl.setAttribute(
+      'sandbox',
+      'allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-modals allow-popups-to-escape-sandbox'
+    );
+    iframeEl.style.width = '100%';
+    iframeEl.style.height = '100%';
+    iframeEl.style.border = '0';
+    iframeEl.style.display = 'block';
+    iframeEl.style.background = '#fff';
+    mountEl.appendChild(iframeEl);
+  } else {
+    mountEl.innerHTML =
+      app.content ||
+      `<div class="app-placeholder"><h3>${app.title}</h3><p>Sin contenido todavía.</p></div>`;
+  }
+
+  return {
+    appId,
+    mountEl,
+    iframeEl
+  };
+}
+
+function mountAppInstance(instance) {
+  if (!instance) return;
+
+  if (instance.mountEl.parentNode !== appWindowBodyEl) {
+    appWindowBodyEl.replaceChildren(instance.mountEl);
+  }
+
+  instance.mountEl.style.display = 'block';
+}
+
+function renderCurrentAppInstance() {
+  if (!currentAppInstance) return;
+  mountAppInstance(currentAppInstance);
+}
+
+function openSwitchConfirm(appId) {
+  pendingOpenAppId = appId;
+  appSwitchConfirmEl.hidden = false;
+}
+
+function closeSwitchConfirm() {
+  pendingOpenAppId = null;
+  appSwitchConfirmEl.hidden = true;
+}
+
+function updateDockIndicators() {
+  appDockButtons.forEach((btn) => {
+    const appId = btn.dataset.appId;
+    btn.classList.remove('is-running', 'is-active');
+
+    if (appId === currentOpenAppId && !appOverlayEl.hidden) {
+      btn.classList.add('is-running', 'is-active');
+    } else if (appId === minimizedAppId) {
+      btn.classList.add('is-running');
+    }
+  });
+}
+
+async function syncAppsDockVisibility() {
+  const isLoggedIn = !!currentUser;
+
+  appsDockEl.hidden = !isLoggedIn;
+
+  if (!isLoggedIn) {
+    closeSwitchConfirm();
+    await hardCloseCurrentApp();
+  }
+}
+
+async function hardCloseCurrentApp() {
+  if (appTransitionLock) return;
+  appTransitionLock = true;
+
+  try {
+    if (currentAppInstance?.iframeEl) {
+      try {
+        currentAppInstance.iframeEl.src = 'about:blank';
+      } catch (e) {}
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 40));
+
+    if (currentAppInstance?.mountEl?.parentNode) {
+      currentAppInstance.mountEl.parentNode.removeChild(currentAppInstance.mountEl);
+    }
+
+    currentAppInstance = null;
+    currentOpenAppId = null;
+    minimizedAppId = null;
+
+    appWindowBodyEl.replaceChildren();
+    appWindowTitleEl.textContent = 'App';
+    appWindowIconEl.textContent = '•';
+    appOverlayEl.hidden = true;
+    document.body.style.overflow = '';
+
+    await new Promise((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    );
+
+    appWindowBodyEl.replaceChildren();
+  } finally {
+    appTransitionLock = false;
+    updateDockIndicators();
+  }
+}
+
+function openAppDirect(appId) {
+  const app = appsRegistry[appId];
+  if (!app || app.type === 'hidden' || appTransitionLock) return;
+
+  currentAppInstance = createAppInstance(appId);
+  currentOpenAppId = appId;
+  minimizedAppId = null;
+
+  appWindowTitleEl.textContent = app.title || 'App';
+  appWindowIconEl.textContent = app.icon || '•';
+
+  mountAppInstance(currentAppInstance);
+
+  appOverlayEl.hidden = false;
+  document.body.style.overflow = 'hidden';
+  updateDockIndicators();
+}
+
+function requestOpenApp(appId) {
+  const app = appsRegistry[appId];
+  if (!app || app.type === 'hidden' || appTransitionLock) return;
+
+  // Si la misma app está abierta, minimizar
+  if (currentOpenAppId === appId && !appOverlayEl.hidden) {
+    minimizeAppWindow();
+    return;
+  }
+
+  // Si la misma app está minimizada, restaurar la MISMA instancia
+  if (minimizedAppId === appId && currentAppInstance && currentAppInstance.appId === appId) {
+    currentOpenAppId = appId;
+    minimizedAppId = null;
+
+    appWindowTitleEl.textContent = app.title || 'App';
+    appWindowIconEl.textContent = app.icon || '•';
+
+    renderCurrentAppInstance();
+    appOverlayEl.hidden = false;
+    document.body.style.overflow = 'hidden';
+    updateDockIndicators();
+    return;
+  }
+
+  // Si hay otra app abierta o minimizada, pedir confirmación
+  if (currentAppInstance && (currentOpenAppId || minimizedAppId)) {
+    openSwitchConfirm(appId);
+    return;
+  }
+
+  // Si no hay ninguna app viva, abrir directo
+  openAppDirect(appId);
+}
+
+function minimizeAppWindow() {
+  if (!currentOpenAppId || !currentAppInstance) return;
+
+  minimizedAppId = currentOpenAppId;
+  currentOpenAppId = null;
+
+  appOverlayEl.hidden = true;
+  document.body.style.overflow = '';
+  updateDockIndicators();
+}
+
+async function closeAppWindow() {
+  await hardCloseCurrentApp();
+}
+
+appDockButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const appId = btn.dataset.appId;
+    requestOpenApp(appId);
+  });
+});
+
+appWindowCloseEl.addEventListener('click', closeAppWindow);
+appWindowMinimizeEl.addEventListener('click', minimizeAppWindow);
+
+appOverlayEl.addEventListener('click', (e) => {
+  if (e.target === appOverlayEl) {
+    minimizeAppWindow();
+  }
+});
+
+appSwitchCancelEl.addEventListener('click', () => {
+  closeSwitchConfirm();
+});
+
+appSwitchConfirmEl.addEventListener('click', (e) => {
+  if (e.target === appSwitchConfirmEl) {
+    closeSwitchConfirm();
+  }
+});
+
+appSwitchOkEl.addEventListener('click', async () => {
+  const nextAppId = pendingOpenAppId;
+  closeSwitchConfirm();
+
+  if (!nextAppId) return;
+
+  await hardCloseCurrentApp();
+  openAppDirect(nextAppId);
+});
+
+document.addEventListener('keydown', async (e) => {
+  if (e.key === 'Escape') {
+    if (!appSwitchConfirmEl.hidden) {
+      closeSwitchConfirm();
+      return;
+    }
+
+    if (!appOverlayEl.hidden) {
+      minimizeAppWindow();
+    }
+  }
+});
+
+updateDockIndicators();
   loadSession();  // ---------- PWA: Service Worker ---------- if ('serviceWorker' in navigator) {   navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW no registrado:', err)); }
   </script>
 </body>
