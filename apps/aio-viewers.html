@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aio Viewers</title>
+  <meta name="theme-color" content="#050608" />
+  <style>
+    :root {
+      --bg: #050608;
+      --panel: #0d1015;
+      --panel-2: #131922;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.14);
+      --text: #e8edf5;
+      --muted: #9aa6b8;
+      --faint: #718096;
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --accent: #8fb7ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top, rgba(143,183,255,0.12), transparent 32%),
+        linear-gradient(180deg, #040507 0%, #090c11 100%);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .shell {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 24px 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.6rem, 2vw, 2.4rem);
+      line-height: 1.1;
+      font-weight: 700;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+      line-height: 1.55;
+      font-size: 0.98rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .viewer-card {
+      appearance: none;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+        var(--panel);
+      color: inherit;
+      border-radius: var(--radius);
+      padding: 18px;
+      text-align: left;
+      display: grid;
+      gap: 14px;
+      cursor: pointer;
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      min-height: 180px;
+    }
+
+    .viewer-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+    }
+
+    .viewer-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .viewer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .viewer-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      font-size: 1.35rem;
+      flex: 0 0 auto;
+    }
+
+    .viewer-badge {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    .viewer-body {
+      display: grid;
+      gap: 10px;
+    }
+
+    .viewer-name {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .viewer-desc {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.94rem;
+    }
+
+    .viewer-formats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .viewer-formats span {
+      font-size: 0.78rem;
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 999px;
+      padding: 6px 10px;
+    }
+
+    .viewer-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .viewer-arrow {
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .note {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .status {
+      min-height: 1.5em;
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding-left: 2px;
+    }
+
+    .status.ok { color: #9fddb4; }
+    .status.warn { color: #f3c87c; }
+    .status.error { color: #f29aa3; }
+
+    @media (max-width: 780px) {
+      body { padding: 14px; }
+
+      .shell { gap: 14px; }
+
+      .hero,
+      .viewer-card {
+        border-radius: 18px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .viewer-card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Aio Suite · Viewers</div>
+      <h1>Aio Viewers</h1>
+      <p>
+        Abre una versión local y especializada de cada visor para probar archivos antes de indexarlos en un dirArc.
+        Cada app acepta solo formatos compatibles con su motor de visualización.
+      </p>
+    </section>
+
+    <section class="grid" aria-label="Apps de Aio Viewers">
+      <button class="viewer-card" data-app="3dm" type="button">
+        <div class="viewer-top">
+          <div class="viewer-icon" aria-hidden="true">◼</div>
+          <div class="viewer-badge">Rhino</div>
+        </div>
+        <div class="viewer-body">
+          <h2 class="viewer-name">Aio 3DM</h2>
+          <p class="viewer-desc">Abre modelos Rhino locales en el visor 3DM.</p>
+          <div class="viewer-formats">
+            <span>.3dm</span>
+          </div>
+        </div>
+        <div class="viewer-footer">
+          <span>Viewer dedicado</span>
+          <span class="viewer-arrow" aria-hidden="true">↗</span>
+        </div>
+      </button>
+
+      <button class="viewer-card" data-app="ifc" type="button">
+        <div class="viewer-top">
+          <div class="viewer-icon" aria-hidden="true">▥</div>
+          <div class="viewer-badge">BIM</div>
+        </div>
+        <div class="viewer-body">
+          <h2 class="viewer-name">Aio IFC</h2>
+          <p class="viewer-desc">Abre modelos BIM locales en el visor IFC.</p>
+          <div class="viewer-formats">
+            <span>.ifc</span>
+          </div>
+        </div>
+        <div class="viewer-footer">
+          <span>Viewer dedicado</span>
+          <span class="viewer-arrow" aria-hidden="true">↗</span>
+        </div>
+      </button>
+
+      <button class="viewer-card" data-app="dxf" type="button">
+        <div class="viewer-top">
+          <div class="viewer-icon" aria-hidden="true">⌁</div>
+          <div class="viewer-badge">CAD</div>
+        </div>
+        <div class="viewer-body">
+          <h2 class="viewer-name">Aio DXF</h2>
+          <p class="viewer-desc">Abre planos CAD locales en el visor DXF.</p>
+          <div class="viewer-formats">
+            <span>.dxf</span>
+          </div>
+        </div>
+        <div class="viewer-footer">
+          <span>Viewer dedicado</span>
+          <span class="viewer-arrow" aria-hidden="true">↗</span>
+        </div>
+      </button>
+
+      <button class="viewer-card" data-app="map" type="button">
+        <div class="viewer-top">
+          <div class="viewer-icon" aria-hidden="true">⌖</div>
+          <div class="viewer-badge">Geo</div>
+        </div>
+        <div class="viewer-body">
+          <h2 class="viewer-name">Aio Mapas</h2>
+          <p class="viewer-desc">Abre archivos geográficos locales en el visor de mapas.</p>
+          <div class="viewer-formats">
+            <span>.geojson</span>
+            <span>.json</span>
+          </div>
+        </div>
+        <div class="viewer-footer">
+          <span>Viewer dedicado</span>
+          <span class="viewer-arrow" aria-hidden="true">↗</span>
+        </div>
+      </button>
+
+      <button class="viewer-card" data-app="media" type="button">
+        <div class="viewer-top">
+          <div class="viewer-icon" aria-hidden="true">◫</div>
+          <div class="viewer-badge">Docs & Media</div>
+        </div>
+        <div class="viewer-body">
+          <h2 class="viewer-name">Aio Media</h2>
+          <p class="viewer-desc">Abre documentos y medios locales compatibles con el visor multimedia.</p>
+          <div class="viewer-formats">
+            <span>.webm</span>
+            <span>.mp4</span>
+            <span>.mp3</span>
+            <span>.pdf</span>
+            <span>.txt</span>
+            <span>.md</span>
+          </div>
+        </div>
+        <div class="viewer-footer">
+          <span>Viewer dedicado</span>
+          <span class="viewer-arrow" aria-hidden="true">↗</span>
+        </div>
+      </button>
+    </section>
+
+    <section class="note">
+      Esta app actúa como lanzador. Cada viewer se abre en una ventana separada con su propia interfaz de arrastre y apertura local.
+    </section>
+
+    <div class="status" id="status">Selecciona una app para continuar.</div>
+  </main>
+
+  <script>
+    const BASE_VIEWER_URL = 'https://archivo-1.github.io/aiorepo.c/local-preview.html';
+    const statusEl = document.getElementById('status');
+
+    function setStatus(text, type = '') {
+      statusEl.className = 'status' + (type ? ' ' + type : '');
+      statusEl.textContent = text;
+    }
+
+    function openViewerApp(appKey, appLabel) {
+      const url = BASE_VIEWER_URL + '?app=' + encodeURIComponent(appKey);
+
+      const popup = window.open(
+        url,
+        '_blank',
+        'popup=yes,width=1280,height=820,left=60,top=40,resizable=yes,scrollbars=yes'
+      );
+
+      if (popup) {
+        setStatus(appLabel + ' se abrió correctamente en una ventana nueva.', 'ok');
+      } else {
+        setStatus('El navegador bloqueó la apertura de ' + appLabel + '. Revisa la configuración de popups para este sitio.', 'warn');
+      }
+    }
+
+    document.querySelectorAll('.viewer-card').forEach((button) => {
+      button.addEventListener('click', () => {
+        const appKey = button.dataset.app;
+        const appLabel = button.querySelector('.viewer-name')?.textContent || appKey;
+        openViewerApp(appKey, appLabel);
+      });
+    });
+  </script>
+</body>
+</html>
