@@ -839,6 +839,33 @@
 }
 
 /* =========================
+   AJUSTES ICONOS DOCK
+========================= */
+.app-dock-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.dock-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  /* Descomenta la siguiente línea si tus iconos son negros y necesitas que se vean blancos en el dock oscuro: */
+  /* filter: invert(1); */
+}
+
+.dock-separator {
+  width: 1px;
+  height: 24px; /* Altura de la línea */
+  background-color: rgba(255, 255, 255, 0.15); /* Color blanco sutil semitransparente */
+  margin: 0 2px; /* Un poco de margen extra para separar visualmente */
+  border-radius: 2px;
+}
+
+/* =========================
    MOBILE
 ========================= */
 
@@ -869,6 +896,8 @@
     display: none;
   }
 }
+
+
     /* --- FIN: Correcciones exclusivas para móviles --- */
   </style>
 </head>
@@ -1088,35 +1117,39 @@
      APPS DOCK
 ========================= -->
 <div id="apps-dock" class="apps-dock" aria-label="Apps">
-  <button class="app-dock-btn" data-app-id="arc-editor" aria-label="ARC Editor">
-    <span class="app-dock-icon">E</span>
-    <span class="app-dock-indicator"></span>
-    <span class="app-tooltip">Editor ARC</span>
-  </button>
 
   <button class="app-dock-btn" data-app-id="local-preview" aria-label="Local Preview">
-    <span class="app-dock-icon">V</span>
+    <span class="app-dock-icon"><img src="thumbnails/dock_viewers.png" alt="Visor" class="dock-img"></span>
     <span class="app-dock-indicator"></span>
     <span class="app-tooltip">Visor Aio</span>
   </button>
 
+  <div class="dock-separator"></div>
+
+  <button class="app-dock-btn" data-app-id="arc-editor" aria-label="ARC Editor">
+    <span class="app-dock-icon"><img src="thumbnails/dock_editor.png" alt="Editor" class="dock-img"></span>
+    <span class="app-dock-indicator"></span>
+    <span class="app-tooltip">Editor ARC</span>
+  </button>
+
   <button class="app-dock-btn" data-app-id="link-assistant" aria-label="Link Assistant">
-    <span class="app-dock-icon">A</span>
+    <span class="app-dock-icon"><img src="thumbnails/dock_url.png" alt="Asistente" class="dock-img"></span>
     <span class="app-dock-indicator"></span>
     <span class="app-tooltip">Asistente URL</span>
   </button>
 
   <button class="app-dock-btn" data-app-id="quick-start" aria-label="Quick Start">
-    <span class="app-dock-icon">G</span>
+    <span class="app-dock-icon"><img src="thumbnails/dock_guia.png" alt="Guía" class="dock-img"></span>
     <span class="app-dock-indicator"></span>
     <span class="app-tooltip">Guía de inicio rápido</span>
   </button>
 
   <!-- Hidden future app -->
   <button class="app-dock-btn is-hidden" data-app-id="theme-lab" aria-label="Theme Lab">
-    <span class="app-dock-icon">T</span>
+    <span class="app-dock-icon"><img src="thumbnails/dock_theme.png" alt="Theme Lab" class="dock-img"></span>
     <span class="app-tooltip">Theme Lab</span>
   </button>
+
 </div>
 
 <!-- =========================
@@ -2576,31 +2609,31 @@ async function loadSession() {
 const appsRegistry = {
   'arc-editor': {
     title: 'Editor ARC',
-    icon: 'E',
+    icon: 'thumbnails/dock_editor.png',
     type: 'iframe',
     src: 'https://archivo-1.github.io/aiodb/apps/aioeditor.html'
   },
   'local-preview': {
     title: 'Visor Aio',
-    icon: 'V',
+    icon: 'thumbnails/dock_viewers.png',
     type: 'iframe',
     src: 'https://archivo-1.github.io/aiodb/apps/aio-viewers.html'
   },
   'link-assistant': {
     title: 'Asistente URL',
-    icon: 'A',
+    icon: 'thumbnails/dock_url.png',
     type: 'iframe',
     src: 'https://archivo-1.github.io/aiodb/apps/arcnavi.html'
   },
   'quick-start': {
     title: 'Guía de inicio',
-    icon: 'G',
+    icon: 'thumbnails/dock_guia.png',
     type: 'iframe',
     src: 'https://archivo-1.github.io/aiorepo.c/index.html?slugDirArc=aiorepo'
   },
   'theme-lab': {
     title: 'Theme Lab',
-    icon: 'T',
+    icon: 'thumbnails/dock_theme.png',
     type: 'hidden',
     content: `<div class="app-placeholder"><h3>Theme Lab</h3><p>Herramienta futura oculta.</p></div>`
   }
@@ -2765,7 +2798,7 @@ function openAppDirect(appId) {
   minimizedAppId = null;
 
   appWindowTitleEl.textContent = app.title || 'App';
-  appWindowIconEl.textContent = app.icon || '•';
+  appWindowIconEl.innerHTML = app.icon ? `<img src="${app.icon}" class="dock-img">` : '•';
 
   mountAppInstance(currentAppInstance);
 
@@ -2790,7 +2823,7 @@ function requestOpenApp(appId) {
     minimizedAppId = null;
 
     appWindowTitleEl.textContent = app.title || 'App';
-    appWindowIconEl.textContent = app.icon || '•';
+    appWindowIconEl.innerHTML = app.icon ? `<img src="${app.icon}" class="dock-img">` : '•';
 
     renderCurrentAppInstance();
     appOverlayEl.hidden = false;
