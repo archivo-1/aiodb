@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg: #020617;Contenedor de ruta. demo.geojson @ Dropbox
+      --bg: #020617;
       --panel: #0b1220;
       --panel-soft: #0f172a;
       --accent: #3b82f6;
@@ -513,6 +513,23 @@
         min-width: 0;
       }
     }
+
+
+.meta-link {
+  color: var(--text-soft);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.meta-link:hover,
+.meta-link:focus-visible {
+  color: #e5e7eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
     /* =========================
    APPS DOCK
 ========================= */
@@ -1694,82 +1711,447 @@ async function loadSession() {
     lr.className = 'small ok';
   };
 
-  // ---------- Aio Repo ----------
-  async function loadDirArcs() {
-    const listEl = document.getElementById('dirarc-list');
-    const resultEl = document.getElementById('dirarc-list-result');
-    const newItemBtn = document.getElementById('btn-open-create-item-panel');
-    listEl.innerHTML = '';
-    resultEl.textContent = '';
+// ---------- Aio Repo ----------
+async function loadDirArcs() {
+  const listEl = document.getElementById('dirarc-list');
+  const resultEl = document.getElementById('dirarc-list-result');
+  const newItemBtn = document.getElementById('btn-open-create-item-panel');
+  listEl.innerHTML = '';
+  resultEl.textContent = '';
 
-    if (!currentUser) return;
+  if (!currentUser) return;
 
-    const { data, error } = await supabase
-      .from('dirarcs')
-      .select('*')
-      .eq('owner_user_id', currentUser.id)
-      .order('created_at', { ascending: true });
+  const { data, error } = await supabase
+    .from('dirarcs')
+    .select('*')
+    .eq('owner_user_id', currentUser.id)
+    .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error(error);
-      resultEl.textContent = 'Error cargando Aio Repo: ' + error.message;
-      resultEl.className = 'small error';
-      return;
-    }
+  if (error) {
+    console.error(error);
+    resultEl.textContent = 'Error cargando Aio Repo: ' + error.message;
+    resultEl.className = 'small error';
+    return;
+  }
 
-    dirarcsCache = data || [];
+  dirarcsCache = data || [];
 
-    if (!dirarcsCache.length) {
-      listEl.innerHTML = '<li class="small">No tienes ningún Aio Repo todavía. Usa “+ Aio Repo”.</li>';
-      resetDirArcUI();
-      newItemBtn.style.display = 'none';
-      return;
-    }
+  if (!dirarcsCache.length) {
+    listEl.innerHTML = '<li class="small">No tienes ningún Aio Repo todavía. Usa “+ Aio Repo”.</li>';
+    resetDirArcUI();
+    newItemBtn.style.display = 'none';
+    return;
+  }
 
+  renderDirArcList();
+  if (!currentDirArc && dirarcsCache.length > 0) {
+    currentDirArc = dirarcsCache[0];
     renderDirArcList();
-    if (!currentDirArc && dirarcsCache.length > 0) {
-      currentDirArc = dirarcsCache[0];
+    renderCurrentDirArcLabel();
+    loadDirArcItems();
+  } else {
+    renderCurrentDirArcLabel();
+    if (currentDirArc) loadDirArcItems();
+  }
+  newItemBtn.style.display = currentDirArc ? '' : 'none';
+}
+
+function renderDirArcList() {
+  const listEl = document.getElementById('dirarc-list');
+  listEl.innerHTML = '';
+
+  if (!dirarcsCache.length) {
+    listEl.innerHTML = '<li class="small">No tienes ningún Aio Repo todavía.</li>';
+    return;
+  }
+
+  dirarcsCache.forEach(d => {
+    const li = document.createElement('li');
+
+    const main = document.createElement('div');
+    main.className = 'dirarc-main';
+
+    const titleSpan = document.createElement('div');
+    titleSpan.className = 'dirarc-title';
+    titleSpan.textContent = d.title || d.slug || 'Aio Repo';
+
+    const actions = document.createElement('div');
+    actions.className = 'dirarc-actions';
+
+    const btnShare = document.createElement('button');
+    btnShare.className = 'icon secondary';
+    btnShare.title = 'Compartir';
+    btnShare.textContent = '⤴';
+
+    const btnEdit = document.createElement('button');
+    btnEdit.className = 'icon secondary';
+    btnEdit.title = 'Editar';
+    btnEdit.textContent = '✎';
+
+    const btnDelete = document.createElement('button');
+    btnDelete.className = 'icon secondary';
+    btnDelete.title = 'Borrar Aio Repo';
+    btnDelete.textContent = '🗑';
+    btnDelete.style.color = '#fca5a5';
+
+    actions.appendChild(btnShare);
+    actions.appendChild(btnEdit);
+    actions.appendChild(btnDelete);
+
+    main.appendChild(titleSpan);
+    main.appendChild(actions);
+
+    const meta = document.createElement('div');
+    meta.className = 'dirarc-meta';
+
+    const slugSpan = document.createElement('span');
+    slugSpan.className = 'dirarc-slug';
+
+    const fullUrl = `${ARCHVISTA_BASE}/index.html?slugDirArc=${encodeURIComponent(d.slug || '')}`;
+
+    if (d.slug) {
+      const slugLink = document.createElement('a');
+      slugLink.className = 'meta-link';
+      slugLink.href = fullUrl;
+      slugLink.target = '_blank';
+      slugLink.rel = 'noopener noreferrer';
+      slugLink.textContent = `/${d.slug}`;
+      slugLink.onclick = ev => ev.stopPropagation();
+      slugSpan.appendChild(slugLink);
+    } else {
+      slugSpan.textContent = '/sin-slug';
+    }
+
+    const countSpan = document.createElement('span');
+    countSpan.className = 'chip-count';
+    const count = d.items_count ?? '';
+    countSpan.textContent = count ? `${count} cont.` : '';
+
+    meta.appendChild(slugSpan);
+    meta.appendChild(countSpan);
+
+    li.appendChild(main);
+    li.appendChild(meta);
+
+    li.onclick = () => {
+      currentDirArc = d;
       renderDirArcList();
       renderCurrentDirArcLabel();
       loadDirArcItems();
-    } else {
-      renderCurrentDirArcLabel();
-      if (currentDirArc) loadDirArcItems();
+      document.getElementById('btn-open-create-item-panel').style.display = '';
+    };
+
+    if (currentDirArc && currentDirArc.id === d.id) {
+      li.classList.add('active');
     }
-    newItemBtn.style.display = currentDirArc ? '' : 'none';
+
+    btnShare.onclick = async ev => {
+      ev.stopPropagation();
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: d.title || 'Aio Repo',
+            text: d.description || 'Aio Repo en ArchVista',
+            url: fullUrl
+          });
+        } catch (err) {
+          console.warn('Error al compartir', err);
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(fullUrl);
+        } catch {}
+      }
+    };
+
+    btnEdit.onclick = ev => {
+      ev.stopPropagation();
+      openDirArcEditor(d);
+    };
+
+    btnDelete.onclick = async ev => {
+      ev.stopPropagation();
+      if (!confirm(`¿Borrar el Aio Repo "${d.title || d.slug}" y todos sus contenedores? Esta acción no se puede deshacer.`)) return;
+
+      const { error: errItems } = await supabase.from('items').delete().eq('dirarc_id', d.id);
+      if (errItems) {
+        alert('Error borrando contenedores: ' + errItems.message);
+        return;
+      }
+
+      const { error } = await supabase.from('dirarcs').delete().eq('id', d.id);
+      if (error) {
+        alert('Error borrando Aio Repo: ' + error.message);
+        return;
+      }
+
+      if (currentDirArc && currentDirArc.id === d.id) {
+        currentDirArc = null;
+        resetDirArcUI();
+      }
+
+      await loadDirArcs();
+    };
+
+    listEl.appendChild(li);
+  });
+}
+
+function renderCurrentDirArcLabel() {
+  const label = document.getElementById('current-dirarc-label');
+  const itemsHeaderTitle = document.querySelector('#items-header h2');
+
+  if (!currentDirArc) {
+    if (itemsHeaderTitle) itemsHeaderTitle.textContent = 'Contenedores';
+    label.textContent = 'Ningún Aio Repo seleccionado.';
+    return;
   }
 
-  function renderDirArcList() {
-    const listEl = document.getElementById('dirarc-list');
-    listEl.innerHTML = '';
+  if (itemsHeaderTitle) {
+    itemsHeaderTitle.textContent = currentDirArc.title || currentDirArc.slug || 'Aio Repo';
+  }
 
-    if (!dirarcsCache.length) {
-      listEl.innerHTML = '<li class="small">No tienes ningún Aio Repo todavía.</li>';
-      return;
+  label.innerHTML = '';
+
+  if (currentDirArc.slug) {
+    const fullUrl = `${ARCHVISTA_BASE}/index.html?slugDirArc=${encodeURIComponent(currentDirArc.slug)}`;
+    const slugLink = document.createElement('a');
+    slugLink.className = 'meta-link';
+    slugLink.href = fullUrl;
+    slugLink.target = '_blank';
+    slugLink.rel = 'noopener noreferrer';
+    slugLink.textContent = `/${currentDirArc.slug}`;
+    label.appendChild(slugLink);
+  } else {
+    label.textContent = '/sin-slug';
+  }
+}
+
+async function saveDirArc() {
+  const slugEl = document.getElementById('dirarc-slug');
+  const titleEl = document.getElementById('dirarc-title');
+  const descEl = document.getElementById('dirarc-desc');
+  const resultEl = document.getElementById('dirarc-create-result');
+  const btn = document.getElementById('btn-save-dirarc');
+
+  const slug = slugEl.value.trim();
+  const title = titleEl.value.trim();
+  const description = descEl.value.trim();
+
+  if (!currentUser) {
+    resultEl.textContent = 'Debes iniciar sesión primero.';
+    resultEl.className = 'small error';
+    return;
+  }
+  if (!slug || !title) {
+    resultEl.textContent = 'Nombre e identificador son obligatorios.';
+    resultEl.className = 'small error';
+    return;
+  }
+
+  btn.disabled = true;
+  resultEl.textContent = editingDirArc ? 'Actualizando Aio Repo...' : 'Creando Aio Repo...';
+  resultEl.className = 'small';
+
+  let error;
+  let data;
+
+  if (editingDirArc) {
+    const resp = await supabase
+      .from('dirarcs')
+      .update({ slug, title, description })
+      .eq('id', editingDirArc.id)
+      .select()
+      .single();
+    error = resp.error;
+    data = resp.data;
+  } else {
+    const resp = await supabase
+      .from('dirarcs')
+      .insert({
+        owner_user_id: currentUser.id,
+        slug,
+        title,
+        description,
+        public: false
+      })
+      .select()
+      .single();
+    error = resp.error;
+    data = resp.data;
+  }
+
+  btn.disabled = false;
+
+  if (error) {
+    console.error(error);
+    resultEl.textContent = 'Error guardando Aio Repo: ' + error.message;
+    resultEl.className = 'small error';
+    return;
+  }
+
+  resultEl.textContent = 'Aio Repo guardado.';
+  resultEl.className = 'small ok';
+
+  editingDirArc = null;
+  document.getElementById('dirarc-panel-title').textContent = 'Nuevo Aio Repo';
+
+  slugEl.value = '';
+  titleEl.value = '';
+  descEl.value = '';
+
+  currentDirArc = data;
+  await loadDirArcs();
+  renderCurrentDirArcLabel();
+  closePanel('dirarc');
+}
+
+function openDirArcEditor(dirarc) {
+  editingDirArc = dirarc;
+  document.getElementById('dirarc-panel-title').textContent = 'Editar Aio Repo';
+  document.getElementById('dirarc-title').value = dirarc.title || '';
+  document.getElementById('dirarc-slug').value = dirarc.slug || '';
+  document.getElementById('dirarc-desc').value = dirarc.description || '';
+  updateSlugPreview();
+  document.getElementById('dirarc-create-result').textContent = '';
+  openPanel('dirarc');
+}
+
+// ---------- Contenedores ----------
+async function loadDirArcItems() {
+  const viewEl = document.getElementById('dirarc-items-view');
+  const collSelect = document.getElementById('item-coleccion-select');
+  viewEl.innerHTML = '';
+  dirarcItemsCache = [];
+  collSelect.innerHTML = '';
+  const opt = document.createElement('option');
+  opt.value = '';
+  opt.textContent = 'Escribe una nueva colección…';
+  collSelect.appendChild(opt);
+
+  if (!currentDirArc) {
+    viewEl.textContent = 'Selecciona un Aio Repo para ver sus contenedores.';
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('dirarc_id', currentDirArc.id)
+    .order('coleccion', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error(error);
+    viewEl.textContent = 'Error cargando contenedores: ' + error.message;
+    return;
+  }
+
+  dirarcItemsCache = data || [];
+  renderItemsWithFilter();
+}
+
+function renderItemsWithFilter() {
+  const viewEl = document.getElementById('dirarc-items-view');
+  const collSelect = document.getElementById('item-coleccion-select');
+  viewEl.innerHTML = '';
+
+  if (!dirarcItemsCache.length) {
+    viewEl.textContent = 'Este Aio Repo no tiene contenedores todavía. Usa “+ Contenedor”.';
+    return;
+  }
+
+  const term = (currentSearchTerm || '').toLowerCase();
+
+  const filtered = dirarcItemsCache.filter(it => {
+    if (!term) return true;
+    const label = (it.nombre || '').toLowerCase();
+    const coll = (it.coleccion || '').toLowerCase();
+    const human = humanSourceLabel(it.archivo, it.categoria, it.categoria === 'enlace').toLowerCase();
+    return label.includes(term) || coll.includes(term) || human.includes(term);
+  });
+
+  if (!filtered.length) {
+    viewEl.textContent = 'No se encontraron contenedores que coincidan con la búsqueda.';
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(it => {
+    const key = it.coleccion || '(sin colección)';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(it);
+  });
+
+  collSelect.innerHTML = '';
+  const opt = document.createElement('option');
+  opt.value = '';
+  opt.textContent = 'Escribe una nueva colección…';
+  collSelect.appendChild(opt);
+
+  const keys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+  keys.forEach(coll => {
+    if (coll !== '(sin colección)') {
+      const o = document.createElement('option');
+      o.value = coll;
+      o.textContent = coll;
+      collSelect.appendChild(o);
     }
 
-    dirarcsCache.forEach(d => {
-      const li = document.createElement('li');
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'items-group';
+
+    const title = document.createElement('div');
+    title.className = 'items-group-title';
+    title.textContent = `Colección: ${coll}`;
+    groupDiv.appendChild(title);
+
+    groups[coll].forEach(it => {
+      const line = document.createElement('div');
+      line.className = 'items-group-item';
 
       const main = document.createElement('div');
-      main.className = 'dirarc-main';
+      main.className = 'item-main';
 
-      const titleSpan = document.createElement('div');
-      titleSpan.className = 'dirarc-title';
-      titleSpan.textContent = d.title || d.slug;
+      const meta = classifyUrlForMedia(it.archivo || it.resolved_url || '', it.categoria === 'enlace');
+
+      const icon = document.createElement('div');
+      icon.className = 'item-icon';
+      icon.textContent = (meta.icon || '●');
+
+      const textWrap = document.createElement('div');
+      textWrap.className = 'item-text';
+
+      const slugParam = currentDirArc && currentDirArc.slug ? currentDirArc.slug : '';
+      const extra = slugParam ? `&slugDirArc=${encodeURIComponent(slugParam)}` : '';
+      const visor = it.visor || meta.visor || 'media';
+      const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponent(it.id)}${extra}`;
+
+      const nameSpan = document.createElement('div');
+      nameSpan.className = 'item-name';
+
+      const nameLink = document.createElement('a');
+      nameLink.className = 'meta-link';
+      nameLink.href = viewerUrl;
+      nameLink.target = '_blank';
+      nameLink.rel = 'noopener noreferrer';
+      nameLink.textContent = it.nombre || it.item_id || '(sin nombre)';
+      nameLink.onclick = ev => ev.stopPropagation();
+      nameSpan.appendChild(nameLink);
+
+      const urlSpan = document.createElement('div');
+      urlSpan.className = 'item-url';
+      urlSpan.textContent = humanSourceLabel(it.archivo, it.categoria, it.categoria === 'enlace');
+
+      textWrap.appendChild(nameSpan);
+      textWrap.appendChild(urlSpan);
+
+      main.appendChild(icon);
+      main.appendChild(textWrap);
 
       const actions = document.createElement('div');
-      actions.className = 'dirarc-actions';
-
-      const btnVisit = document.createElement('button');
-      btnVisit.className = 'icon secondary';
-      btnVisit.title = 'Abrir en ArchVista';
-      btnVisit.textContent = '↗';
-
-      const btnCopy = document.createElement('button');
-      btnCopy.className = 'icon secondary';
-      btnCopy.title = 'Copiar enlace';
-      btnCopy.textContent = '⧉';
+      actions.className = 'item-actions';
 
       const btnShare = document.createElement('button');
       btnShare.className = 'icon secondary';
@@ -1778,446 +2160,91 @@ async function loadSession() {
 
       const btnEdit = document.createElement('button');
       btnEdit.className = 'icon secondary';
-      btnEdit.title = 'Editar';
+      btnEdit.title = 'Editar contenedor';
       btnEdit.textContent = '✎';
 
-      actions.appendChild(btnVisit);
-      actions.appendChild(btnCopy);
+      const btnDelete = document.createElement('button');
+      btnDelete.className = 'icon secondary';
+      btnDelete.title = 'Borrar';
+      btnDelete.textContent = '🗑';
+
       actions.appendChild(btnShare);
       actions.appendChild(btnEdit);
-              const btnDelete = document.createElement('button');
-              btnDelete.className = 'icon secondary';
-              btnDelete.title = 'Borrar Aio Repo';
-              btnDelete.textContent = '🗑';
-              btnDelete.style.color = '#fca5a5';
-              actions.appendChild(btnDelete);
+      actions.appendChild(btnDelete);
 
-      main.appendChild(titleSpan);
-      main.appendChild(actions);
-
-      const meta = document.createElement('div');
-      meta.className = 'dirarc-meta';
-      const slugSpan = document.createElement('span');
-      slugSpan.className = 'dirarc-slug';
-      slugSpan.textContent = `Aio Repo: ${d.slug}`;
-
-      const countSpan = document.createElement('span');
-      countSpan.className = 'chip-count';
-      const count = d.items_count ?? '';
-      countSpan.textContent = count ? `${count} cont.` : '';
-
-      meta.appendChild(slugSpan);
-      meta.appendChild(countSpan);
-
-      li.appendChild(main);
-      li.appendChild(meta);
-
-      li.onclick = () => {
-        currentDirArc = d;
-        renderDirArcList();
-        renderCurrentDirArcLabel();
-        loadDirArcItems();
-        document.getElementById('btn-open-create-item-panel').style.display = '';
-      };
-      if (currentDirArc && currentDirArc.id === d.id) {
-        li.classList.add('active');
-      }
-
-      const fullUrl = `${ARCHVISTA_BASE}/index.html?slugDirArc=${encodeURIComponent(d.slug)}`;
-
-      btnVisit.onclick = ev => {
-        ev.stopPropagation();
-        window.open(fullUrl, '_blank');
-      };
-      btnCopy.onclick = async ev => {
-        ev.stopPropagation();
-        try {
-          await navigator.clipboard.writeText(fullUrl);
-        } catch (err) {
-          console.warn('No se pudo copiar al portapapeles', err);
-        }
-      };
       btnShare.onclick = async ev => {
         ev.stopPropagation();
         if (navigator.share) {
           try {
             await navigator.share({
-              title: d.title || 'Aio Repo',
-              text: d.description || 'Aio Repo en ArchVista',
-              url: fullUrl
+              title: it.nombre || 'Contenedor ArchVista',
+              text: it.descripcion || 'Contenido en ArchVista',
+              url: viewerUrl
             });
           } catch (err) {
             console.warn('Error al compartir', err);
           }
         } else {
           try {
-            await navigator.clipboard.writeText(fullUrl);
+            await navigator.clipboard.writeText(viewerUrl);
           } catch {}
         }
       };
+
       btnEdit.onclick = ev => {
         ev.stopPropagation();
-        openDirArcEditor(d);
+        openItemEditor(it);
       };
 
-              btnDelete.onclick = async ev => {
-                          ev.stopPropagation();
-                          if (!confirm(`¿Borrar el Aio Repo "${d.title || d.slug}" y todos sus contenedores? Esta acción no se puede deshacer.`)) return;
-                          const { error: errItems } = await supabase.from('items').delete().eq('dirarc_id', d.id);
-                          if (errItems) { alert('Error borrando contenedores: ' + errItems.message); return; }
-                          const { error } = await supabase.from('dirarcs').delete().eq('id', d.id);
-                          if (error) { alert('Error borrando Aio Repo: ' + error.message); return; }
-                          if (currentDirArc && currentDirArc.id === d.id) { currentDirArc = null; resetDirArcUI(); }
-                          await loadDirArcs();
-                        };
-      listEl.appendChild(li);
-    });
-  }
+      btnDelete.onclick = async ev => {
+        ev.stopPropagation();
 
-  function renderCurrentDirArcLabel() {
-    const label = document.getElementById('current-dirarc-label');
-    if (!currentDirArc) {
-      label.textContent = 'Ningún Aio Repo seleccionado.';
-    } else {
-      label.textContent = `Aio Repo activo: ${currentDirArc.title || currentDirArc.slug} (id: ${currentDirArc.slug})`;
-    }
-  }
+        if (btnDelete.disabled) return;
 
-  async function saveDirArc() {
-    const slugEl = document.getElementById('dirarc-slug');
-    const titleEl = document.getElementById('dirarc-title');
-    const descEl = document.getElementById('dirarc-desc');
-    const resultEl = document.getElementById('dirarc-create-result');
-    const btn = document.getElementById('btn-save-dirarc');
+        const ok = confirm(`¿Borrar el contenedor ${it.item_id}?`);
+        if (!ok) return;
 
-    const slug = slugEl.value.trim();
-    const title = titleEl.value.trim();
-    const description = descEl.value.trim();
+        btnDelete.disabled = true;
 
-    if (!currentUser) {
-      resultEl.textContent = 'Debes iniciar sesión primero.';
-      resultEl.className = 'small error';
-      return;
-    }
-    if (!slug || !title) {
-      resultEl.textContent = 'Nombre e identificador son obligatorios.';
-      resultEl.className = 'small error';
-      return;
-    }
+        const { error } = await supabase
+          .from('items')
+          .delete()
+          .eq('id', it.id);
 
-    btn.disabled = true;
-    resultEl.textContent = editingDirArc ? 'Actualizando Aio Repo...' : 'Creando Aio Repo...';
-    resultEl.className = 'small';
+        btnDelete.disabled = false;
 
-    let error;
-    let data;
+        if (error) {
+          console.error(error);
+          alert('Error borrando contenedor: ' + error.message);
+          return;
+        }
 
-    if (editingDirArc) {
-      const resp = await supabase
-        .from('dirarcs')
-        .update({ slug, title, description })
-        .eq('id', editingDirArc.id)
-        .select()
-        .single();
-      error = resp.error;
-      data = resp.data;
-    } else {
-      const resp = await supabase
-        .from('dirarcs')
-        .insert({
-          owner_user_id: currentUser.id,
-          slug,
-          title,
-          description,
-          public: false
-        })
-        .select()
-        .single();
-      error = resp.error;
-      data = resp.data;
-    }
+        await loadDirArcItems();
+      };
 
-    btn.disabled = false;
-
-    if (error) {
-      console.error(error);
-      resultEl.textContent = 'Error guardando Aio Repo: ' + error.message;
-      resultEl.className = 'small error';
-      return;
-    }
-
-    resultEl.textContent = 'Aio Repo guardado.';
-    resultEl.className = 'small ok';
-
-    editingDirArc = null;
-    document.getElementById('dirarc-panel-title').textContent = 'Nuevo Aio Repo';
-
-    slugEl.value = '';
-    titleEl.value = '';
-    descEl.value = '';
-
-    currentDirArc = data;
-    await loadDirArcs();
-    renderCurrentDirArcLabel();
-    closePanel('dirarc');
-  }
-
-  function openDirArcEditor(dirarc) {
-    editingDirArc = dirarc;
-    document.getElementById('dirarc-panel-title').textContent = 'Editar Aio Repo';
-    document.getElementById('dirarc-title').value = dirarc.title || '';
-    document.getElementById('dirarc-slug').value = dirarc.slug || '';
-    document.getElementById('dirarc-desc').value = dirarc.description || '';
-    updateSlugPreview();
-    document.getElementById('dirarc-create-result').textContent = '';
-    openPanel('dirarc');
-  }
-
-  // ---------- Contenedores ----------
-  async function loadDirArcItems() {
-    const viewEl = document.getElementById('dirarc-items-view');
-    const collSelect = document.getElementById('item-coleccion-select');
-    viewEl.innerHTML = '';
-    dirarcItemsCache = [];
-    collSelect.innerHTML = '';
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = 'Escribe una nueva colección…';
-    collSelect.appendChild(opt);
-
-    if (!currentDirArc) {
-      viewEl.textContent = 'Selecciona un Aio Repo para ver sus contenedores.';
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('items')
-      .select('*')
-      .eq('dirarc_id', currentDirArc.id)
-      .order('coleccion', { ascending: true })
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error(error);
-      viewEl.textContent = 'Error cargando contenedores: ' + error.message;
-      return;
-    }
-
-    dirarcItemsCache = data || [];
-    renderItemsWithFilter();
-  }
-
-  function renderItemsWithFilter() {
-    const viewEl = document.getElementById('dirarc-items-view');
-    const collSelect = document.getElementById('item-coleccion-select');
-    viewEl.innerHTML = '';
-
-    if (!dirarcItemsCache.length) {
-      viewEl.textContent = 'Este Aio Repo no tiene contenedores todavía. Usa “+ Contenedor”.';
-      return;
-    }
-
-    const term = (currentSearchTerm || '').toLowerCase();
-
-    const filtered = dirarcItemsCache.filter(it => {
-      if (!term) return true;
-      const label = (it.nombre || '').toLowerCase();
-      const coll = (it.coleccion || '').toLowerCase();
-      const human = humanSourceLabel(it.archivo, it.categoria, it.categoria === 'enlace').toLowerCase();
-      return label.includes(term) || coll.includes(term) || human.includes(term);
+      line.appendChild(main);
+      line.appendChild(actions);
+      groupDiv.appendChild(line);
     });
 
-    if (!filtered.length) {
-      viewEl.textContent = 'No se encontraron contenedores que coincidan con la búsqueda.';
-      return;
-    }
-
-    const groups = {};
-    filtered.forEach(it => {
-      const key = it.coleccion || '(sin colección)';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(it);
-    });
-
-    collSelect.innerHTML = '';
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = 'Escribe una nueva colección…';
-    collSelect.appendChild(opt);
-
-    const keys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
-
-    keys.forEach(coll => {
-      if (coll !== '(sin colección)') {
-        const o = document.createElement('option');
-        o.value = coll;
-        o.textContent = coll;
-        collSelect.appendChild(o);
-      }
-
-      const groupDiv = document.createElement('div');
-      groupDiv.className = 'items-group';
-      const title = document.createElement('div');
-      title.className = 'items-group-title';
-      title.textContent = `Colección: ${coll}`;
-      groupDiv.appendChild(title);
-
-      groups[coll].forEach(it => {
-        const line = document.createElement('div');
-        line.className = 'items-group-item';
-
-        const main = document.createElement('div');
-        main.className = 'item-main';
-
-        const meta = classifyUrlForMedia(it.archivo || it.resolved_url || '', it.categoria === 'enlace');
-        const icon = document.createElement('div');
-        icon.className = 'item-icon';
-        icon.textContent = (meta.icon || '●');
-
-        const textWrap = document.createElement('div');
-        textWrap.className = 'item-text';
-
-        const nameSpan = document.createElement('div');
-        nameSpan.className = 'item-name';
-        nameSpan.textContent = it.nombre || it.item_id;
-
-        const urlSpan = document.createElement('div');
-        urlSpan.className = 'item-url';
-        urlSpan.textContent = humanSourceLabel(it.archivo, it.categoria, it.categoria === 'enlace');
-
-        textWrap.appendChild(nameSpan);
-        textWrap.appendChild(urlSpan);
-
-        main.appendChild(icon);
-        main.appendChild(textWrap);
-
-        const actions = document.createElement('div');
-        actions.className = 'item-actions';
-
-        const btnVisit = document.createElement('button');
-        btnVisit.className = 'icon secondary';
-        btnVisit.title = 'Abrir en ArchVista';
-        btnVisit.textContent = '↗';
-
-        const btnCopy = document.createElement('button');
-        btnCopy.className = 'icon secondary';
-        btnCopy.title = 'Copiar enlace visor';
-        btnCopy.textContent = '⧉';
-
-        const btnShare = document.createElement('button');
-        btnShare.className = 'icon secondary';
-        btnShare.title = 'Compartir';
-        btnShare.textContent = '⤴';
-
-        const btnEdit = document.createElement('button');
-        btnEdit.className = 'icon secondary';
-        btnEdit.title = 'Editar contenedor';
-        btnEdit.textContent = '✎';
-
-        const btnDelete = document.createElement('button');
-        btnDelete.className = 'icon secondary';
-        btnDelete.title = 'Borrar';
-        btnDelete.textContent = '🗑';
-
-        actions.appendChild(btnVisit);
-        actions.appendChild(btnCopy);
-        actions.appendChild(btnShare);
-        actions.appendChild(btnEdit);
-        actions.appendChild(btnDelete);
-
-                const slugParam = currentDirArc.slug;
-        const extra = slugParam ? `&slugDirArc=${encodeURIComponent(slugParam)}` : '';
-        const visor = it.visor || meta.visor || 'media';
-        const viewerUrl = `${ARCHVISTA_BASE}/viewer-${visor}.html?id=${encodeURIComponent(it.id)}${extra}`;
-
-        btnVisit.onclick = ev => {
-          ev.stopPropagation();
-          window.open(viewerUrl, '_blank');
-        };
-
-        btnCopy.onclick = async ev => {
-          ev.stopPropagation();
-          try {
-            await navigator.clipboard.writeText(viewerUrl);
-          } catch (err) {
-            console.warn('No se pudo copiar enlace', err);
-          }
-        };
-
-        btnShare.onclick = async ev => {
-          ev.stopPropagation();
-          if (navigator.share) {
-            try {
-              await navigator.share({
-                title: it.nombre || 'Contenedor ArchVista',
-                text: it.descripcion || 'Contenido en ArchVista',
-                url: viewerUrl
-              });
-            } catch (err) {
-              console.warn('Error al compartir', err);
-            }
-          } else {
-            try {
-              await navigator.clipboard.writeText(viewerUrl);
-            } catch {}
-          }
-        };
-
-        btnEdit.onclick = ev => {
-          ev.stopPropagation();
-          openItemEditor(it);
-        };
-
-        btnDelete.onclick = async ev => {
-          ev.stopPropagation();
-
-          // Evitar dobles clics mientras se borra
-          if (btnDelete.disabled) return;
-
-          const ok = confirm(`¿Borrar el contenedor ${it.item_id}?`);
-          if (!ok) return;
-
-          btnDelete.disabled = true;
-
-          const { error } = await supabase
-            .from('items')
-            .delete()
-            .eq('id', it.id); // usar id (uuid)
-
-          btnDelete.disabled = false;
-
-          if (error) {
-            console.error(error);
-            alert('Error borrando contenedor: ' + error.message);
-            return;
-          }
-
-          await loadDirArcItems();
-        };
-
-        line.appendChild(main);
-        line.appendChild(actions);
-        groupDiv.appendChild(line);
-      });
-
-      viewEl.appendChild(groupDiv);
-    });
-  }
-
-  // selección de colección
-  const collSelectEl = document.getElementById('item-coleccion-select');
-  const collInputEl = document.getElementById('item-coleccion-input');
-  collSelectEl.addEventListener('change', () => {
-    const val = collSelectEl.value;
-    collInputEl.value = val || '';
+    viewEl.appendChild(groupDiv);
   });
+}
 
-  const archivoInputEl = document.getElementById('item-archivo');
-  const iframeOptionsEl = document.getElementById('external-link-options');
-  const typePreviewEl = document.getElementById('type-preview');
-  const useIframeEl = document.getElementById('item-use-iframe');
+// selección de colección
+const collSelectEl = document.getElementById('item-coleccion-select');
+const collInputEl = document.getElementById('item-coleccion-input');
+collSelectEl.addEventListener('change', () => {
+  const val = collSelectEl.value;
+  collInputEl.value = val || '';
+});
 
-  function updateTypePreview() {
+const archivoInputEl = document.getElementById('item-archivo');
+const iframeOptionsEl = document.getElementById('external-link-options');
+const typePreviewEl = document.getElementById('type-preview');
+const useIframeEl = document.getElementById('item-use-iframe');
+
+function updateTypePreview() {
   const url = archivoInputEl.value.trim();
   const useIframe = useIframeEl.checked;
 
@@ -2227,16 +2254,13 @@ async function loadSession() {
     return;
   }
 
-  const isStor  = isStorage(url);
-  const isYT    = isYoutube(url) || isVimeo(url);
+  const isStor = isStorage(url);
+  const isYT = isYoutube(url) || isVimeo(url);
   const isGDocs = /^https?:\/\/docs\.google\.com\//i.test(url);
 
   if (isYT || isStor || isGDocs) {
-    // YouTube/Vimeo, storage (Dropbox/Drive/Supabase) o Google Docs/Sheets/Slides:
-    // no mostramos la opción de iframe manual.
     iframeOptionsEl.style.display = 'none';
   } else if (/^https?:\/\//i.test(url)) {
-    // Sitio externo genérico: dejamos elegir iframe o no.
     iframeOptionsEl.style.display = 'block';
   } else {
     iframeOptionsEl.style.display = 'none';
@@ -2246,155 +2270,150 @@ async function loadSession() {
   typePreviewEl.textContent = `Se detectará como visor “${meta.visor}” y categoría “${meta.categoria}”.`;
 }
 
+archivoInputEl.addEventListener('input', updateTypePreview);
+useIframeEl.addEventListener('change', updateTypePreview);
 
-  archivoInputEl.addEventListener('input', updateTypePreview);
-  useIframeEl.addEventListener('change', updateTypePreview);
+async function saveItem() {
+  const resultEl = document.getElementById('item-result');
+  const btn = document.getElementById('btn-save-item');
 
-  async function saveItem() {
-    const resultEl = document.getElementById('item-result');
-    const btn = document.getElementById('btn-save-item');
+  if (btn.disabled) return;
 
-    // Evitar dobles clics si ya hay un guardado en curso
-    if (btn.disabled) return;
+  if (!currentUser || !currentDirArc) {
+    resultEl.textContent = 'Debes iniciar sesión y seleccionar un Aio Repo primero.';
+    resultEl.className = 'small error';
+    return;
+  }
 
-    if (!currentUser || !currentDirArc) {
-      resultEl.textContent = 'Debes iniciar sesión y seleccionar un Aio Repo primero.';
+  const nombre = document.getElementById('item-nombre').value.trim();
+  const coleccion = document.getElementById('item-coleccion-input').value.trim();
+  let archivoRaw = document.getElementById('item-archivo').value.trim();
+  const descripcion = document.getElementById('item-descripcion').value.trim();
+  const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
+  const useIframe = document.getElementById('item-use-iframe').checked;
+
+  function extractGoogleEmbedSrc(htmlOrUrl) {
+    const text = htmlOrUrl || '';
+    const m = text.match(/src=["'](https?:\/\/docs\.google\.com\/[^"']+)["']/i);
+    if (m && m[1]) {
+      return m[1];
+    }
+    return htmlOrUrl;
+  }
+
+  archivoRaw = extractGoogleEmbedSrc(archivoRaw);
+  const archivo = archivoRaw;
+
+  if (!nombre || !coleccion || !archivo) {
+    resultEl.textContent = 'Nombre, colección y archivo/enlace son obligatorios.';
+    resultEl.className = 'small error';
+    return;
+  }
+
+  let itemId;
+  if (editingItem) {
+    itemId = editingItem.item_id;
+  } else {
+    let baseSlug = (currentDirArc.slug || 'dirarc').replace(/[^a-zA-Z0-9_]/g, '_');
+    if (!baseSlug) baseSlug = 'dirarc';
+    const count = dirarcItemsCache.length || 0;
+    itemId = `${baseSlug}_${String(count + 1).padStart(3, '0')}`;
+  }
+
+  const meta = classifyUrlForMedia(archivo, useIframe);
+  const resolvedUrl = normalizeExternalUrl(archivo);
+  const source = resolvedUrl.startsWith('http') ? 'url' : 'local';
+
+  let uiConfig = null;
+  if (uiConfigRaw) {
+    try {
+      uiConfig = JSON.parse(uiConfigRaw);
+    } catch {
+      resultEl.textContent = 'uiConfig no es JSON válido (deja el campo vacío si no lo necesitas).';
       resultEl.className = 'small error';
       return;
     }
+  }
 
-    const nombre = document.getElementById('item-nombre').value.trim();
-    const coleccion = document.getElementById('item-coleccion-input').value.trim();
-    let archivoRaw = document.getElementById('item-archivo').value.trim();
-    const descripcion = document.getElementById('item-descripcion').value.trim();
-    const uiConfigRaw = document.getElementById('item-ui-config').value.trim();
-    const useIframe = document.getElementById('item-use-iframe').checked;
+  btn.disabled = true;
+  resultEl.textContent = editingItem ? 'Actualizando contenedor...' : 'Creando contenedor...';
+  resultEl.className = 'small';
 
-    // Normalización especial: si el usuario pegó un <iframe> de Google,
-    // extraemos solo el src="https://docs.google.com/...."
-    function extractGoogleEmbedSrc(htmlOrUrl) {
-      const text = htmlOrUrl || '';
-      const m = text.match(/src=["'](https?:\/\/docs\.google\.com\/[^"']+)["']/i);
-      if (m && m[1]) {
-        return m[1];
-      }
-      return htmlOrUrl;
-    }
-
-    archivoRaw = extractGoogleEmbedSrc(archivoRaw);
-    const archivo = archivoRaw;
-
-    if (!nombre || !coleccion || !archivo) {
-      resultEl.textContent = 'Nombre, colección y archivo/enlace son obligatorios.';
-      resultEl.className = 'small error';
-      return;
-    }
-
-    let itemId;
-    if (editingItem) {
-      itemId = editingItem.item_id;
-    } else {
-      let baseSlug = (currentDirArc.slug || 'dirarc').replace(/[^a-zA-Z0-9_]/g, '_');
-      if (!baseSlug) baseSlug = 'dirarc';
-      const count = dirarcItemsCache.length || 0;
-      itemId = `${baseSlug}_${String(count + 1).padStart(3, '0')}`;
-    }
-
-    const meta = classifyUrlForMedia(archivo, useIframe);
-    const resolvedUrl = normalizeExternalUrl(archivo);
-    const source = resolvedUrl.startsWith('http') ? 'url' : 'local';
-
-    let uiConfig = null;
-    if (uiConfigRaw) {
-      try {
-        uiConfig = JSON.parse(uiConfigRaw);
-      } catch {
-        resultEl.textContent = 'uiConfig no es JSON válido (deja el campo vacío si no lo necesitas).';
-        resultEl.className = 'small error';
-        return;
-      }
-    }
-
-    btn.disabled = true;
-    resultEl.textContent = editingItem ? 'Actualizando contenedor...' : 'Creando contenedor...';
-    resultEl.className = 'small';
-
-    let error;
-    if (editingItem) {
-      const resp = await supabase.from('items')
-        .update({
-          nombre,
-          coleccion,
-          archivo,
-          resolved_url: resolvedUrl,
-          descripcion,
-          visor: meta.visor,
-          categoria: meta.categoria,
-          thumbnail: meta.thumbnail,
-          ui_config: uiConfig
-        })
-        .eq('id', editingItem.id); // usar id (uuid)
-      error = resp.error;
-    } else {
-      const resp = await supabase.from('items').insert({
-        dirarc_id: currentDirArc.id,
-        item_id: itemId,
+  let error;
+  if (editingItem) {
+    const resp = await supabase.from('items')
+      .update({
         nombre,
-        visor: meta.visor,
-        categoria: meta.categoria,
         coleccion,
-        source,
         archivo,
         resolved_url: resolvedUrl,
         descripcion,
-        tamano: null,
+        visor: meta.visor,
+        categoria: meta.categoria,
         thumbnail: meta.thumbnail,
         ui_config: uiConfig
-      });
-      error = resp.error;
-    }
-
-    btn.disabled = false;
-
-    if (error) {
-      console.error(error);
-      resultEl.textContent = 'Error guardando contenedor: ' + error.message;
-      resultEl.className = 'small error';
-      return;
-    }
-
-    resultEl.textContent = 'Contenedor guardado.';
-    resultEl.className = 'small ok';
-
-    editingItem = null;
-    document.getElementById('item-panel-title').textContent = 'Nuevo contenedor';
-
-    document.getElementById('item-nombre').value = '';
-    document.getElementById('item-archivo').value = '';
-    document.getElementById('item-descripcion').value = '';
-    document.getElementById('item-ui-config').value = '';
-    document.getElementById('item-use-iframe').checked = false;
-    iframeOptionsEl.style.display = 'none';
-    typePreviewEl.textContent = '';
-
-    await loadDirArcItems();
-    closePanel('item');
+      })
+      .eq('id', editingItem.id);
+    error = resp.error;
+  } else {
+    const resp = await supabase.from('items').insert({
+      dirarc_id: currentDirArc.id,
+      item_id: itemId,
+      nombre,
+      visor: meta.visor,
+      categoria: meta.categoria,
+      coleccion,
+      source,
+      archivo,
+      resolved_url: resolvedUrl,
+      descripcion,
+      tamano: null,
+      thumbnail: meta.thumbnail,
+      ui_config: uiConfig
+    });
+    error = resp.error;
   }
 
-  function openItemEditor(item) {
-    editingItem = item;
-    document.getElementById('item-panel-title').textContent = 'Editar contenedor';
-    document.getElementById('item-nombre').value = item.nombre || '';
-    document.getElementById('item-coleccion-input').value = item.coleccion || '';
-    document.getElementById('item-archivo').value = item.archivo || '';
-    document.getElementById('item-descripcion').value = item.descripcion || '';
-    document.getElementById('item-ui-config').value = item.ui_config ? JSON.stringify(item.ui_config, null, 2) : '';
-    document.getElementById('item-use-iframe').checked = item.categoria === 'enlace';
-    updateTypePreview();
-    document.getElementById('item-result').textContent = '';
-    openPanel('item');
+  btn.disabled = false;
+
+  if (error) {
+    console.error(error);
+    resultEl.textContent = 'Error guardando contenedor: ' + error.message;
+    resultEl.className = 'small error';
+    return;
   }
 
+  resultEl.textContent = 'Contenedor guardado.';
+  resultEl.className = 'small ok';
+
+  editingItem = null;
+  document.getElementById('item-panel-title').textContent = 'Nuevo contenedor';
+
+  document.getElementById('item-nombre').value = '';
+  document.getElementById('item-archivo').value = '';
+  document.getElementById('item-descripcion').value = '';
+  document.getElementById('item-ui-config').value = '';
+  document.getElementById('item-use-iframe').checked = false;
+  iframeOptionsEl.style.display = 'none';
+  typePreviewEl.textContent = '';
+
+  await loadDirArcItems();
+  closePanel('item');
+}
+
+function openItemEditor(item) {
+  editingItem = item;
+  document.getElementById('item-panel-title').textContent = 'Editar contenedor';
+  document.getElementById('item-nombre').value = item.nombre || '';
+  document.getElementById('item-coleccion-input').value = item.coleccion || '';
+  document.getElementById('item-archivo').value = item.archivo || '';
+  document.getElementById('item-descripcion').value = item.descripcion || '';
+  document.getElementById('item-ui-config').value = item.ui_config ? JSON.stringify(item.ui_config, null, 2) : '';
+  document.getElementById('item-use-iframe').checked = item.categoria === 'enlace';
+  updateTypePreview();
+  document.getElementById('item-result').textContent = '';
+  openPanel('item');
+}
   // ---------- Paneles ----------
   const overlayEl = document.getElementById('panel-overlay');
   const panelDirArcEl = document.getElementById('panel-create-dirarc');
@@ -2614,7 +2633,7 @@ const appsRegistry = {
     src: 'https://archivo-1.github.io/aiodb/apps/aioeditor.html'
   },
   'local-preview': {
-    title: 'Visores Aio',
+    title: 'Visor Aio',
     icon: 'thumbnails/dock_viewers.png',
     type: 'iframe',
     src: 'https://archivo-1.github.io/aiodb/apps/aio-viewers.html'
