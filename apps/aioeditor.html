@@ -882,35 +882,36 @@ function fromLimitedItem(limited, originalFullItem = {}) {
 }
 
     function createNewItemFull() {
-      const slug = currentDirArc?.slug || 'dirarc';
-      const time = nowIso();
-      return {
-        id: generateUUID(),
-        collection_id: null,
-        item_id: nextItemId(slug, itemsCache),
-        nombre: 'Nuevo item',
-        visor: 'media',
-        categoria: 'otro',
-        coleccion: '',
-        source: 'url',
-        archivo: '',
-        resolved_url: '',
-        descripcion: '',
-        tamano: null,
-        thumbnail: 'thumbnails/gt_0.png',
-        ui_config: null,
-        lat: null,
-        lon: null,
-        zoom: null,
-        order_index: itemsCache.length,
-        created_at: time,
-        updated_at: time,
-        dirarc_id: currentDirArc?.id || null,
-        __isNew: true,
-        __dirty: true,
-        __result: ''
-      };
-    }
+  const slug = currentDirArc?.slug || 'dirarc';
+  const time = nowIso();
+
+  return {
+    id: generateUUID(),
+    collection_id: null,
+    item_id: nextItemId(slug, itemsCache),
+    nombre: 'Nuevo contenedor',
+    visor: '',
+    categoria: '',
+    coleccion: 'Nueva colección',
+    source: 'url',
+    archivo: '',
+    resolved_url: '',
+    descripcion: '',
+    tamano: '',
+    thumbnail: 'thumbnails/gt_0.png',
+    ui_config: null,
+    lat: null,
+    lon: null,
+    zoom: null,
+    order_index: itemsCache.length,
+    created_at: time,
+    updated_at: time,
+    dirarc_id: currentDirArc?.id || null,
+    __isNew: true,
+    __dirty: true,
+    __result: ''
+  };
+}
 
     // ============================================================
     // UI DE SESIÓN
@@ -1332,10 +1333,10 @@ function fromLimitedItem(limited, originalFullItem = {}) {
         card.dataset.itemId = item.id;
 
         const subtitleParts = [
-          item.item_id || 'sin item_id',
-          limited.categoria || 'sin categoría',
-          limited.coleccion || 'sin colección'
-        ].filter(Boolean);
+  item.item_id || 'sin item_id',
+  limited.categoria || 'categoría pendiente',
+  limited.coleccion || 'sin colección'
+].filter(Boolean);
 
         card.innerHTML = `
           <div class="item-summary">
