@@ -1,369 +1,1533 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Theme Lab — Launcher</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theme Lab</title>
   <style>
     :root {
-      --bg: #020617;
-      --panel: #0b1220;
-      --panel-soft: #0f172a;
-      --border-soft: rgba(148, 163, 184, 0.35);
-      --accent: #3b82f6;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
+      --bg: #081018;
+      --panel: #101926;
+      --panel-2: #0c1420;
+      --panel-3: #111b29;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.18);
+      --text: #e7edf5;
+      --muted: #93a1b5;
+      --accent: #68a4ff;
+      --danger: #ff8a8a;
+      --ok: #8de0b7;
+      --shadow: 0 20px 50px rgba(0,0,0,0.35);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --radius-xs: 8px;
+      --input-bg: rgba(255,255,255,0.03);
+      --input-border: rgba(255,255,255,0.12);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #111827 0, #020617 45%);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.18), transparent 28%),
+        linear-gradient(180deg, #09111a 0%, #060b12 100%);
       color: var(--text);
       min-height: 100vh;
+    }
+
+    button, input, select { font: inherit; }
+    button {
+      border: 1px solid var(--input-border);
+      background: var(--panel-3);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 0.7rem 0.95rem;
+      cursor: pointer;
+      transition: 0.16s ease;
+    }
+    button:hover { border-color: var(--border-strong); background: #182438; }
+    button.primary { background: linear-gradient(180deg, #3d86ff, #2c6de0); border-color: rgba(104,164,255,0.55); color: white; }
+    button.primary:hover { filter: brightness(1.05); }
+    button.subtle { background: transparent; }
+    button.danger { color: #ffd1d1; border-color: rgba(255,138,138,0.3); }
+    button:disabled { opacity: 0.55; cursor: default; }
+
+    .app {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      padding: 12px;
-      gap: 12px;
+      gap: 16px;
+      min-height: 100vh;
     }
 
-    header {
+    .topbar {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: baseline;
+      gap: 16px;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      background: rgba(10,16,24,0.76);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+    }
+
+    .title-wrap h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .title-wrap p {
+      margin: 0.18rem 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
       gap: 8px;
-    }
-
-    header h1 {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    header span {
-      font-size: 0.75rem;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
       color: var(--muted);
+      max-width: 280px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.8rem;
     }
 
-    .status {
-      font-size: 0.75rem;
-      color: var(--muted);
+    .screen {
+      display: none;
+      min-height: 0;
+    }
+    .screen.active { display: block; }
+
+    .auth-shell {
+      min-height: calc(100vh - 110px);
+      display: grid;
+      place-items: center;
     }
 
-    .status strong {
-      color: var(--accent);
+    .auth-card {
+      width: min(960px, 100%);
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
     }
 
     .panel {
-      background: rgba(15, 23, 42, 0.96);
-      border-radius: 10px;
-      border: 1px solid var(--border-soft);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-height: 120px;
+      border: 1px solid var(--border);
+      background: rgba(14,21,31,0.94);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
     }
 
-    .list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.8rem;
+    .hero-panel {
+      padding: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(104,164,255,0.18), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+        rgba(14,21,31,0.96);
+    }
+
+    .hero-panel h2, .form-panel h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+    }
+    .hero-panel p, .form-panel p {
+      margin: 0;
       color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.93rem;
     }
 
-    .dirarc-list {
-      list-style: none;
-      margin: 4px 0 0;
+    .hero-list {
+      margin: 1.2rem 0 0;
       padding: 0;
-      max-height: 260px;
-      overflow-y: auto;
-      font-size: 0.8rem;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+    .hero-list li {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.035);
+      color: #d6e0ef;
+      font-size: 0.88rem;
     }
 
-    .dirarc-item {
+    .form-panel { padding: 24px; }
+    .stack { display: grid; gap: 12px; margin-top: 16px; }
+    .field { display: grid; gap: 6px; }
+    .field label {
+      font-size: 0.82rem;
+      color: #dfe7f4;
+      font-weight: 600;
+    }
+    .field .help {
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    input[type="email"], input[type="password"], input[type="text"], input[type="url"], input[type="number"], select {
+      width: 100%;
+      padding: 0.75rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text);
+      outline: none;
+    }
+    input[type="checkbox"] { transform: translateY(1px); }
+    input[type="range"] { width: 100%; }
+    input:focus, select:focus {
+      border-color: rgba(104,164,255,0.65);
+      box-shadow: 0 0 0 3px rgba(104,164,255,0.14);
+    }
+
+    .auth-actions, .row-actions {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    .dirarc-item + .dirarc-item {
+      gap: 10px;
+      flex-wrap: wrap;
       margin-top: 4px;
     }
 
-    .dirarc-item:hover {
-      border-color: rgba(96, 165, 250, 0.7);
-      background: rgba(15, 23, 42, 0.98);
-    }
-
-    .dirarc-item.active {
-      border-color: rgba(96, 165, 250, 1);
-      background: rgba(30, 64, 175, 0.45);
-    }
-
-    .dirarc-main {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .dirarc-title {
-      font-weight: 500;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 180px;
-    }
-
-    .dirarc-slug {
-      font-size: 0.7rem;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 140px;
-    }
-
-    .dirarc-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .chip {
-      padding: 1px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      font-size: 0.68rem;
-    }
-
-    .pill {
-      padding: 1px 6px;
-      border-radius: 999px;
-      font-size: 0.68rem;
-      border: 1px solid transparent;
-    }
-
-    .pill.has-theme {
-      border-color: rgba(34, 197, 94, 0.7);
-      color: #bbf7d0;
-      background: rgba(22, 101, 52, 0.35);
-    }
-
-    .pill.no-theme {
-      border-color: rgba(148, 163, 184, 0.4);
-      color: var(--muted);
-      background: rgba(15, 23, 42, 0.8);
-    }
-
     .message {
+      min-height: 18px;
       font-size: 0.8rem;
+      margin-top: 6px;
+    }
+    .message.ok { color: var(--ok); }
+    .message.error { color: var(--danger); }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 290px minmax(420px, 1fr) minmax(320px, 0.95fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sidebar, .editor, .preview-wrap {
+      min-height: calc(100vh - 126px);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .panel-head h2 {
+      margin: 0;
+      font-size: 0.96rem;
+    }
+    .panel-head p {
+      margin: 0.28rem 0 0;
       color: var(--muted);
-      padding: 8px 0;
+      font-size: 0.78rem;
+      line-height: 1.45;
     }
 
-    .error {
-      color: #fca5a5;
+    .dirarc-list {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      max-height: calc(100vh - 210px);
+      overflow: auto;
     }
 
-    .small {
+    .dirarc-item {
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+    .dirarc-item.active {
+      border-color: rgba(104,164,255,0.6);
+      background: rgba(104,164,255,0.12);
+    }
+    .dirarc-item-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #eef4fb;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dirarc-item-slug, .dirarc-item-meta {
       font-size: 0.75rem;
       color: var(--muted);
-    }
-
-    button {
-      font-family: inherit;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      background: rgba(15, 23, 42, 0.95);
-      color: #f9fafb;
-      padding: 0.35rem 0.7rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    button.primary {
-      border-color: rgba(59, 130, 246, 0.9);
-      background: linear-gradient(to right, #1d4ed8, #2563eb);
+    .editor-scroll, .preview-scroll {
+      padding: 14px;
+      max-height: calc(100vh - 210px);
+      overflow: auto;
     }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: default;
+    .section-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: grid;
+      gap: 12px;
+    }
+    .section-card h3 {
+      margin: 0;
+      font-size: 0.92rem;
+    }
+    .section-card .section-help {
+      margin-top: -4px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+    .color-control {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .color-control input[type="color"] {
+      width: 46px;
+      height: 42px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .inline-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.84rem;
+      color: #dbe5f2;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .preview-shell {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #050608;
+      min-height: 620px;
+    }
+
+    .preview-frame {
+      --pv-bg: #050608;
+      --pv-surface: #0d1117;
+      --pv-surface2: #111520;
+      --pv-border: rgba(255,255,255,0.07);
+      --pv-border2: rgba(255,255,255,0.12);
+      --pv-text: #e5e7eb;
+      --pv-muted: #6b7280;
+      --pv-accent: #3b82f6;
+      --pv-accent-dim: rgba(59,130,246,0.15);
+      min-height: 620px;
+      color: var(--pv-text);
+      background: var(--pv-bg);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .preview-overlay {
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .preview-content {
+      position: relative;
+      z-index: 1;
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pv-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--pv-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: color-mix(in srgb, var(--pv-bg) 86%, transparent);
+    }
+
+    .pv-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .pv-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--pv-border2);
+      background: var(--pv-surface2);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pv-accent);
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .pv-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .pv-brand h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #f5f7fb;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 240px;
+    }
+    .pv-brand p {
+      margin: 0.22rem 0 0;
+      font-size: 0.76rem;
+      color: var(--pv-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 280px;
+    }
+
+    .pv-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 220px;
+      justify-content: flex-end;
+    }
+    .pv-search, .pv-select {
+      border: 1px solid var(--pv-border);
+      background: var(--pv-surface);
+      color: var(--pv-text);
+      border-radius: 10px;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.8rem;
+    }
+    .pv-search { width: min(260px, 100%); }
+
+    .pv-filters {
+      display: flex;
+      gap: 8px;
+      padding: 12px 20px 0;
+      flex-wrap: wrap;
+    }
+    .pv-chip {
+      border: 1px solid var(--pv-border2);
+      color: var(--pv-muted);
+      border-radius: 999px;
+      padding: 0.34rem 0.68rem;
+      font-size: 0.74rem;
+      background: transparent;
+    }
+    .pv-chip.active {
+      background: var(--pv-accent-dim);
+      color: #d5e6ff;
+      border-color: color-mix(in srgb, var(--pv-accent) 35%, transparent);
+    }
+
+    .pv-main {
+      padding: 18px 20px 22px;
+      display: grid;
+      gap: 14px;
+    }
+    .pv-collection {
+      border-radius: 14px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--pv-surface2) 55%, transparent);
+      border: 1px solid var(--pv-border);
+    }
+    .pv-collection-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--pv-surface);
+      border-bottom: 1px solid var(--pv-border);
+    }
+    .pv-collection-head strong {
+      color: var(--pv-accent);
+      font-size: 0.76rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .pv-collection-head span {
+      color: var(--pv-muted);
+      font-size: 0.74rem;
+    }
+
+    .pv-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      padding: 14px;
+    }
+    .pv-card {
+      border: 1px solid var(--pv-border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--pv-surface);
+    }
+    .pv-thumb {
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--pv-surface2) 75%, black), color-mix(in srgb, var(--pv-accent) 12%, var(--pv-surface)));
+      border-bottom: 1px solid var(--pv-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pv-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .pv-card-body {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .pv-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pv-card-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f3f7fc;
+    }
+    .pv-badge {
+      border-radius: 999px;
+      padding: 0.18rem 0.46rem;
+      border: 1px solid var(--pv-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--pv-muted);
+      font-size: 0.64rem;
+      text-transform: uppercase;
+    }
+    .pv-desc {
+      font-size: 0.78rem;
+      color: var(--pv-muted);
+      line-height: 1.5;
+    }
+    .pv-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pv-footer span { color: var(--pv-muted); font-size: 0.7rem; }
+    .pv-open {
+      border: 1px solid color-mix(in srgb, var(--pv-accent) 34%, transparent);
+      background: var(--pv-accent-dim);
+      color: #d7e7ff;
+      border-radius: 8px;
+      padding: 0.38rem 0.72rem;
+      font-size: 0.72rem;
+    }
+
+    .muted-box {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255,255,255,0.12);
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .tiny { font-size: 0.75rem; color: var(--muted); }
+
+    @media (max-width: 1180px) {
+      .workspace {
+        grid-template-columns: 270px 1fr;
+      }
+      .preview-wrap {
+        grid-column: 1 / -1;
+        min-height: auto;
+      }
+      .preview-scroll { max-height: none; }
+    }
+
+    @media (max-width: 900px) {
+      .auth-card,
+      .workspace,
+      .grid-2,
+      .grid-3,
+      .pv-cards {
+        grid-template-columns: 1fr;
+      }
+      .sidebar, .editor, .preview-wrap {
+        min-height: auto;
+      }
+      .dirarc-list, .editor-scroll {
+        max-height: none;
+      }
+      .topbar {
+        position: static;
+      }
+      .pv-controls {
+        justify-content: stretch;
+      }
+      .pv-search { width: 100%; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Theme Lab</h1>
-      <span>Selecciona un Aio Repo (DirArc) para editar su tema</span>
-    </div>
-    <div id="status" class="status">Cargando sesión…</div>
-  </header>
+  <div class="app">
+    <header class="topbar panel">
+      <div class="title-wrap">
+        <h1>Theme Lab</h1>
+        <p>Editor visual de temas para tus dirArcs en Aio Repo.</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+        <div id="user-pill" class="user-pill" style="display:none;"></div>
+        <button id="btn-logout" class="subtle" style="display:none;">Cerrar sesión</button>
+      </div>
+    </header>
 
-  <section class="panel">
-    <div class="list-header">
-      <span>Mis DirArcs</span>
-      <span class="small" id="active-label">Activo en dashboard: ninguno</span>
-    </div>
-    <div id="message" class="message"></div>
-    <ul id="dirarc-list" class="dirarc-list"></ul>
-  </section>
+    <section id="screen-auth" class="screen active">
+      <div class="auth-shell">
+        <div class="auth-card">
+          <div class="hero-panel panel">
+            <h2>Diseña sin tocar código</h2>
+            <p>Theme Lab te deja ajustar colores, fondo, branding y comportamiento visual de thumbnails para cada dirArc, y guarda todo en <code>theme_config</code> del registro correspondiente.</p>
+            <ul class="hero-list">
+              <li>Elige un dirArc y cambia su apariencia sin editar archivos manualmente.</li>
+              <li>Trabaja con presets fáciles de entender y un preview instantáneo.</li>
+              <li>Funciona por sí solo con Supabase, así puedes probarlo en Live Server antes de integrarlo al dashboard.</li>
+            </ul>
+          </div>
+
+          <div class="form-panel panel">
+            <h2>Iniciar sesión</h2>
+            <p>Usa la misma cuenta que ya administra tus dirArcs.</p>
+            <div class="stack">
+              <div class="field">
+                <label for="login-email">Email</label>
+                <input id="login-email" type="email" placeholder="usuario@ejemplo.com" />
+              </div>
+              <div class="field">
+                <label for="login-password">Contraseña</label>
+                <input id="login-password" type="password" placeholder="Tu contraseña" />
+              </div>
+              <div class="auth-actions">
+                <button id="btn-login" class="primary">Entrar</button>
+                <button id="btn-check-session" class="subtle">Revisar sesión actual</button>
+              </div>
+              <div id="auth-message" class="message"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-app" class="screen">
+      <div class="workspace">
+        <aside class="sidebar panel">
+          <div class="panel-head">
+            <div>
+              <h2>Tus dirArcs</h2>
+              <p>Selecciona el directorio que quieres personalizar.</p>
+            </div>
+            <button id="btn-reload-dirarcs" class="subtle">Recargar</button>
+          </div>
+          <div id="dirarc-list" class="dirarc-list"></div>
+        </aside>
+
+        <main class="editor panel">
+          <div class="panel-head">
+            <div>
+              <h2 id="editor-title">Configura el tema</h2>
+              <p id="editor-subtitle">Selecciona un dirArc para comenzar.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+              <button id="btn-reset-theme" class="subtle" disabled>Restablecer</button>
+              <button id="btn-save-theme" class="primary" disabled>Guardar tema</button>
+            </div>
+          </div>
+
+          <div class="editor-scroll">
+            <div id="empty-editor" class="muted-box">Aún no hay un dirArc seleccionado. Cuando elijas uno en la columna izquierda, aquí aparecerán los controles visuales.</div>
+
+            <div id="editor-sections" style="display:none;">
+              <section class="section-card">
+                <h3>Preset base</h3>
+                <div class="section-help">El preset ayuda a partir desde una idea clara. Puedes cambiarlo y luego ajustar cada detalle manualmente.</div>
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="preset-select">Preset</label>
+                    <select id="preset-select"></select>
+                  </div>
+                  <div class="field">
+                    <label for="generic-thumb-set">Set genérico de thumbnails</label>
+                    <select id="generic-thumb-set">
+                      <option value="gt_0">gt_0 · set actual</option>
+                      <option value="gt_dark">gt_dark · oscuro</option>
+                      <option value="gt_light">gt_light · claro</option>
+                      <option value="gt_blue">gt_blue · azul</option>
+                    </select>
+                  </div>
+                </div>
+                <label class="inline-check">
+                  <input id="prefer-custom-thumbnail" type="checkbox" />
+                  <span>Preferir thumbnail propio del item cuando exista</span>
+                </label>
+              </section>
+
+              <section class="section-card">
+                <h3>Colores</h3>
+                <div class="section-help">Estos colores corresponden a la base visual que ya usa Aio Repo: fondo, superficies, bordes, texto y acento.</div>
+                <div class="grid-2">
+                  <div class="field">
+                    <label>Fondo principal</label>
+                    <div class="color-control">
+                      <input id="color-bg" type="color" />
+                      <input id="text-bg" type="text" placeholder="#050608" />
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Superficie</label>
+                    <div class="color-control">
+                      <input id="color-surface" type="color" />
+                      <input id="text-surface" type="text" placeholder="#0d1117" />
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Superficie 2</label>
+                    <div class="color-control">
+                      <input id="color-surface2" type="color" />
+                      <input id="text-surface2" type="text" placeholder="#111520" />
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Texto</label>
+                    <div class="color-control">
+                      <input id="color-text" type="color" />
+                      <input id="text-text" type="text" placeholder="#e5e7eb" />
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Color apagado</label>
+                    <div class="color-control">
+                      <input id="color-muted" type="color" />
+                      <input id="text-muted" type="text" placeholder="#6b7280" />
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Acento</label>
+                    <div class="color-control">
+                      <input id="color-accent" type="color" />
+                      <input id="text-accent" type="text" placeholder="#3b82f6" />
+                    </div>
+                  </div>
+                </div>
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="text-border">Borde</label>
+                    <input id="text-border" type="text" placeholder="rgba(255,255,255,0.07)" />
+                    <div class="help">Puede ser rgba() para mantener transparencia fina.</div>
+                  </div>
+                  <div class="field">
+                    <label for="text-border2">Borde fuerte</label>
+                    <input id="text-border2" type="text" placeholder="rgba(255,255,255,0.12)" />
+                  </div>
+                  <div class="field" style="grid-column: 1 / -1;">
+                    <label for="text-accent-dim">Acento suave</label>
+                    <input id="text-accent-dim" type="text" placeholder="rgba(59,130,246,0.15)" />
+                    <div class="help">Se usa para pills activas, botones suaves y fondos de énfasis.</div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="section-card">
+                <h3>Fondo</h3>
+                <div class="section-help">Puedes dejar un color sólido o usar una imagen con overlay para reforzar el carácter visual.</div>
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="background-mode">Modo</label>
+                    <select id="background-mode">
+                      <option value="solid">Color sólido</option>
+                      <option value="image">Imagen de fondo</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="background-color">Color base del fondo</label>
+                    <input id="background-color" type="text" placeholder="#050608" />
+                  </div>
+                  <div class="field" style="grid-column:1 / -1;">
+                    <label for="background-image-url">URL de imagen</label>
+                    <input id="background-image-url" type="url" placeholder="https://..." />
+                  </div>
+                  <div class="field">
+                    <label for="background-fit">Ajuste de imagen</label>
+                    <select id="background-fit">
+                      <option value="cover">cover</option>
+                      <option value="contain">contain</option>
+                      <option value="auto">auto</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="background-overlay">Overlay</label>
+                    <input id="background-overlay" type="range" min="0" max="0.85" step="0.01" />
+                    <div class="help"><span id="background-overlay-value">0.18</span> · mayor valor = más oscurecimiento sobre la imagen.</div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="section-card">
+                <h3>Branding</h3>
+                <div class="section-help">Controla el título que se ve en header, subtítulo y logo de cabecera.</div>
+                <label class="inline-check">
+                  <input id="branding-use-custom-title" type="checkbox" />
+                  <span>Usar un título personalizado en vez del título del dirArc</span>
+                </label>
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="branding-custom-title">Título personalizado</label>
+                    <input id="branding-custom-title" type="text" placeholder="Mi biblioteca de proyectos" />
+                  </div>
+                  <div class="field">
+                    <label for="branding-logo-url">URL de logo</label>
+                    <input id="branding-logo-url" type="url" placeholder="https://.../logo.png" />
+                  </div>
+                </div>
+                <label class="inline-check">
+                  <input id="branding-show-subtitle" type="checkbox" />
+                  <span>Mostrar subtítulo</span>
+                </label>
+                <div class="field">
+                  <label for="branding-custom-subtitle">Subtítulo</label>
+                  <input id="branding-custom-subtitle" type="text" placeholder="Aio Repo C 1.0" />
+                </div>
+              </section>
+
+              <section class="section-card">
+                <h3>Acciones</h3>
+                <div class="section-help">Guarda el tema en <code>theme_config</code> del dirArc seleccionado. El prototipo guarda todo aunque el consumidor final todavía deba aplicar esos valores visualmente en Aio Repo.</div>
+                <div class="toolbar">
+                  <button id="btn-save-theme-bottom" class="primary">Guardar tema</button>
+                  <button id="btn-reset-theme-bottom" class="subtle">Restablecer a preset</button>
+                </div>
+                <div id="save-message" class="message"></div>
+              </section>
+            </div>
+          </div>
+        </main>
+
+        <section class="preview-wrap panel">
+          <div class="panel-head">
+            <div>
+              <h2>Preview</h2>
+              <p>Vista aproximada del look de Aio Repo con el tema actual.</p>
+            </div>
+          </div>
+          <div class="preview-scroll">
+            <div class="preview-shell">
+              <div id="preview-frame" class="preview-frame">
+                <div id="preview-overlay" class="preview-overlay"></div>
+                <div class="preview-content">
+                  <div class="pv-header">
+                    <div class="pv-brand">
+                      <div id="preview-logo" class="pv-logo">ARC</div>
+                      <div>
+                        <h4 id="preview-title">Aio Repo</h4>
+                        <p id="preview-subtitle">Aio Repo C 1.0</p>
+                      </div>
+                    </div>
+                    <div class="pv-controls">
+                      <input class="pv-search" type="text" value="Buscar por nombre, descripción o colección..." readonly />
+                      <select class="pv-select" disabled>
+                        <option>Agrupar por colecciones</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="pv-filters">
+                    <div class="pv-chip active">Todo</div>
+                    <div class="pv-chip">Modelo BIM</div>
+                    <div class="pv-chip">PDF</div>
+                    <div class="pv-chip">Mapa</div>
+                    <div class="pv-chip">Enlace</div>
+                  </div>
+
+                  <div class="pv-main">
+                    <div class="pv-collection">
+                      <div class="pv-collection-head">
+                        <strong>Colección principal</strong>
+                        <span>3 items</span>
+                      </div>
+                      <div class="pv-cards">
+                        <article class="pv-card">
+                          <div class="pv-thumb" id="pv-thumb-a">thumbnail</div>
+                          <div class="pv-card-body">
+                            <div class="pv-row">
+                              <div class="pv-card-title">Modelo IFC Cliente X</div>
+                              <div class="pv-badge">BIM</div>
+                            </div>
+                            <div class="pv-desc">Ejemplo de tarjeta para ver contraste, acento, bordes y jerarquía visual.</div>
+                            <div class="pv-footer">
+                              <span>2.8 MB</span>
+                              <button class="pv-open">Abrir</button>
+                            </div>
+                          </div>
+                        </article>
+
+                        <article class="pv-card">
+                          <div class="pv-thumb" id="pv-thumb-b">thumbnail</div>
+                          <div class="pv-card-body">
+                            <div class="pv-row">
+                              <div class="pv-card-title">Plano DXF Fachada Norte</div>
+                              <div class="pv-badge">2D</div>
+                            </div>
+                            <div class="pv-desc">El preview muestra una composición parecida al repo real, no una copia exacta.</div>
+                            <div class="pv-footer">
+                              <span>1.2 MB</span>
+                              <button class="pv-open">Abrir</button>
+                            </div>
+                          </div>
+                        </article>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tiny" style="margin-top:10px;">Si el theme se guarda bien pero todavía no cambia Aio Repo final, eso es normal en esta fase: este prototipo ya escribe <code>theme_config</code>, pero la app consumidora aún tiene que leerlo y aplicarlo.</div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
 
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    const SUPABASE_URL = "https://zihojlqhxfxdjahgrbwy.supabase.co";
-    const SUPABASE_ANON_KEY = "sb-publishable-TZeZu-g4BDlcdXOfWpUGQrN-Sur8t";
-
+    const SUPABASE_URL = 'https://zihojlqhxfxdjahgrbwy.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_TZeZu-g4BDlcdXOfWpUG_Q_rN-Sur8t';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const statusEl = document.getElementById("status");
-    const msgEl = document.getElementById("message");
-    const listEl = document.getElementById("dirarc-list");
-    const activeLabelEl = document.getElementById("active-label");
-
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
-    }
-
-    const activeDirArcId = getQueryParam("activeDirArcId") || null;
-    const activeSlug = getQueryParam("activeSlug") || null;
-
-    if (activeSlug) {
-      activeLabelEl.textContent = `Activo en dashboard: ${activeSlug}`;
-    }
-
-    function renderMessage(text, isError = false) {
-      msgEl.textContent = text || "";
-      msgEl.className = "message" + (isError ? " error" : "");
-    }
-
-    function renderDirArcList(dirarcs) {
-      listEl.innerHTML = "";
-
-      if (!dirarcs.length) {
-        renderMessage("No tienes DirArcs aún. Crea uno desde Aio Dashboard.");
-        return;
+    const DEFAULT_THEME = {
+      version: 1,
+      preset: 'obsidian',
+      colors: {
+        bg: '#050608',
+        surface: '#0d1117',
+        surface2: '#111520',
+        border: 'rgba(255,255,255,0.07)',
+        border2: 'rgba(255,255,255,0.12)',
+        text: '#e5e7eb',
+        muted: '#6b7280',
+        accent: '#3b82f6',
+        accentDim: 'rgba(59,130,246,0.15)'
+      },
+      background: {
+        mode: 'solid',
+        color: '#050608',
+        imageUrl: '',
+        imageFit: 'cover',
+        overlay: 0.18
+      },
+      branding: {
+        useCustomTitle: false,
+        customTitle: '',
+        showSubtitle: true,
+        customSubtitle: 'Aio Repo C 1.0',
+        logoUrl: ''
+      },
+      thumbnails: {
+        genericSet: 'gt_0',
+        preferCustomItemThumbnail: true
       }
+    };
 
-      renderMessage("");
-
-      dirarcs.forEach((d) => {
-        const li = document.createElement("li");
-        li.className = "dirarc-item";
-
-        if (activeDirArcId && d.id === activeDirArcId) {
-          li.classList.add("active");
+    const PRESETS = {
+      obsidian: {
+        label: 'Obsidian',
+        theme: structuredClone(DEFAULT_THEME)
+      },
+      slate: {
+        label: 'Slate',
+        theme: {
+          ...structuredClone(DEFAULT_THEME),
+          preset: 'slate',
+          colors: {
+            bg: '#0b1320',
+            surface: '#111c2b',
+            surface2: '#172434',
+            border: 'rgba(255,255,255,0.08)',
+            border2: 'rgba(255,255,255,0.16)',
+            text: '#e7eef8',
+            muted: '#8ea1bb',
+            accent: '#61a5ff',
+            accentDim: 'rgba(97,165,255,0.17)'
+          },
+          background: { mode: 'solid', color: '#0b1320', imageUrl: '', imageFit: 'cover', overlay: 0.20 },
+          branding: { useCustomTitle: false, customTitle: '', showSubtitle: true, customSubtitle: 'Aio Repo C 1.0', logoUrl: '' },
+          thumbnails: { genericSet: 'gt_blue', preferCustomItemThumbnail: true }
         }
+      },
+      graphite: {
+        label: 'Graphite',
+        theme: {
+          ...structuredClone(DEFAULT_THEME),
+          preset: 'graphite',
+          colors: {
+            bg: '#111111',
+            surface: '#1a1a1a',
+            surface2: '#242424',
+            border: 'rgba(255,255,255,0.09)',
+            border2: 'rgba(255,255,255,0.16)',
+            text: '#f0f0f0',
+            muted: '#9b9b9b',
+            accent: '#d18f2f',
+            accentDim: 'rgba(209,143,47,0.18)'
+          },
+          background: { mode: 'solid', color: '#111111', imageUrl: '', imageFit: 'cover', overlay: 0.16 },
+          branding: { useCustomTitle: false, customTitle: '', showSubtitle: true, customSubtitle: 'Aio Repo C 1.0', logoUrl: '' },
+          thumbnails: { genericSet: 'gt_dark', preferCustomItemThumbnail: true }
+        }
+      },
+      paper: {
+        label: 'Paper',
+        theme: {
+          ...structuredClone(DEFAULT_THEME),
+          preset: 'paper',
+          colors: {
+            bg: '#f2efe8',
+            surface: '#fbfaf7',
+            surface2: '#f1ede5',
+            border: 'rgba(34,34,34,0.10)',
+            border2: 'rgba(34,34,34,0.16)',
+            text: '#1f2430',
+            muted: '#676f7c',
+            accent: '#2d63d7',
+            accentDim: 'rgba(45,99,215,0.14)'
+          },
+          background: { mode: 'solid', color: '#f2efe8', imageUrl: '', imageFit: 'cover', overlay: 0.08 },
+          branding: { useCustomTitle: false, customTitle: '', showSubtitle: true, customSubtitle: 'Aio Repo C 1.0', logoUrl: '' },
+          thumbnails: { genericSet: 'gt_light', preferCustomItemThumbnail: true }
+        }
+      }
+    };
 
-        const hasTheme = !!d.theme_config;
+    let currentUser = null;
+    let dirarcs = [];
+    let selectedDirarc = null;
+    let currentTheme = structuredClone(DEFAULT_THEME);
 
-        const main = document.createElement("div");
-        main.className = "dirarc-main";
+    const $ = (id) => document.getElementById(id);
 
-        const titleDiv = document.createElement("div");
-        titleDiv.className = "dirarc-title";
-        titleDiv.textContent = d.title || d.slug || "(sin título)";
+    const els = {
+      screenAuth: $('screen-auth'),
+      screenApp: $('screen-app'),
+      authMessage: $('auth-message'),
+      loginEmail: $('login-email'),
+      loginPassword: $('login-password'),
+      userPill: $('user-pill'),
+      btnLogout: $('btn-logout'),
+      dirarcList: $('dirarc-list'),
+      editorTitle: $('editor-title'),
+      editorSubtitle: $('editor-subtitle'),
+      emptyEditor: $('empty-editor'),
+      editorSections: $('editor-sections'),
+      saveMessage: $('save-message'),
+      btnSaveTheme: $('btn-save-theme'),
+      btnSaveThemeBottom: $('btn-save-theme-bottom'),
+      btnResetTheme: $('btn-reset-theme'),
+      btnResetThemeBottom: $('btn-reset-theme-bottom'),
+      previewFrame: $('preview-frame'),
+      previewOverlay: $('preview-overlay'),
+      previewTitle: $('preview-title'),
+      previewSubtitle: $('preview-subtitle'),
+      previewLogo: $('preview-logo'),
+      pvThumbA: $('pv-thumb-a'),
+      pvThumbB: $('pv-thumb-b')
+    };
 
-        const themePill = document.createElement("span");
-        themePill.className = "pill " + (hasTheme ? "has-theme" : "no-theme");
-        themePill.textContent = hasTheme ? "Theme definido" : "Theme por defecto";
+    const fieldMap = {
+      bg: ['color-bg', 'text-bg'],
+      surface: ['color-surface', 'text-surface'],
+      surface2: ['color-surface2', 'text-surface2'],
+      text: ['color-text', 'text-text'],
+      muted: ['color-muted', 'text-muted'],
+      accent: ['color-accent', 'text-accent']
+    };
 
-        main.appendChild(titleDiv);
-        main.appendChild(themePill);
+    function structuredCloneSafe(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
 
-        const meta = document.createElement("div");
-        meta.className = "dirarc-meta";
+    function mergeTheme(input) {
+      const source = input && typeof input === 'object' ? input : {};
+      return {
+        version: source.version ?? 1,
+        preset: source.preset ?? DEFAULT_THEME.preset,
+        colors: {
+          ...DEFAULT_THEME.colors,
+          ...(source.colors || {})
+        },
+        background: {
+          ...DEFAULT_THEME.background,
+          ...(source.background || {})
+        },
+        branding: {
+          ...DEFAULT_THEME.branding,
+          ...(source.branding || {})
+        },
+        thumbnails: {
+          ...DEFAULT_THEME.thumbnails,
+          ...(source.thumbnails || {})
+        }
+      };
+    }
 
-        const slugSpan = document.createElement("span");
-        slugSpan.className = "dirarc-slug";
-        slugSpan.textContent = d.slug || "(sin slug)";
+    function setMessage(el, text = '', type = '') {
+      el.textContent = text;
+      el.className = 'message' + (type ? ' ' + type : '');
+    }
 
-        const idSpan = document.createElement("span");
-        idSpan.className = "chip";
-        idSpan.textContent = d.id.slice(0, 8) + "…";
+    function setScreen(name) {
+      els.screenAuth.classList.toggle('active', name === 'auth');
+      els.screenApp.classList.toggle('active', name === 'app');
+    }
 
-        meta.appendChild(slugSpan);
-        meta.appendChild(idSpan);
+    function setAuthUI(user) {
+      currentUser = user || null;
+      if (currentUser) {
+        setScreen('app');
+        els.userPill.style.display = 'inline-flex';
+        els.userPill.textContent = currentUser.email || currentUser.id;
+        els.btnLogout.style.display = 'inline-flex';
+      } else {
+        setScreen('auth');
+        els.userPill.style.display = 'none';
+        els.userPill.textContent = '';
+        els.btnLogout.style.display = 'none';
+        els.dirarcList.innerHTML = '';
+        selectedDirarc = null;
+        setEditorEnabled(false);
+      }
+    }
 
-        li.appendChild(main);
-        li.appendChild(meta);
+    function setEditorEnabled(enabled) {
+      els.emptyEditor.style.display = enabled ? 'none' : 'block';
+      els.editorSections.style.display = enabled ? 'block' : 'none';
+      els.btnSaveTheme.disabled = !enabled;
+      els.btnSaveThemeBottom.disabled = !enabled;
+      els.btnResetTheme.disabled = !enabled;
+      els.btnResetThemeBottom.disabled = !enabled;
+    }
 
-        li.onclick = () => openEditorForDirArc(d);
-
-        listEl.appendChild(li);
+    function populatePresetSelect() {
+      const select = $('preset-select');
+      select.innerHTML = '';
+      Object.entries(PRESETS).forEach(([key, value]) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = value.label;
+        select.appendChild(opt);
       });
     }
 
-    function openEditorForDirArc(dirarc) {
-      // Abrimos el editor en nueva ventana con el id del dirarc
-      const url = `theme-lab-editor.html?dirarcId=${encodeURIComponent(
-        dirarc.id
-      )}&slug=${encodeURIComponent(dirarc.slug || "")}`;
-      window.open(url, "_blank", "noopener,noreferrer");
+    function getTitleForPreview() {
+      if (currentTheme.branding.useCustomTitle && currentTheme.branding.customTitle?.trim()) {
+        return currentTheme.branding.customTitle.trim();
+      }
+      return selectedDirarc?.title || selectedDirarc?.slug || 'Aio Repo';
     }
 
-    async function loadSessionAndDirArcs() {
-      statusEl.textContent = "Verificando sesión…";
+    function getSubtitleForPreview() {
+      if (!currentTheme.branding.showSubtitle) return '';
+      return currentTheme.branding.customSubtitle?.trim() || 'Aio Repo C 1.0';
+    }
 
+    function syncColorField(colorInputId, textInputId, value) {
+      const colorInput = $(colorInputId);
+      const textInput = $(textInputId);
+      textInput.value = value;
+      if (/^#([0-9a-f]{6})$/i.test(value)) colorInput.value = value;
+    }
+
+    function fillFormFromTheme(theme) {
+      $('preset-select').value = theme.preset || 'obsidian';
+      Object.entries(fieldMap).forEach(([key, [colorId, textId]]) => {
+        syncColorField(colorId, textId, theme.colors[key] || DEFAULT_THEME.colors[key]);
+      });
+      $('text-border').value = theme.colors.border;
+      $('text-border2').value = theme.colors.border2;
+      $('text-accent-dim').value = theme.colors.accentDim;
+      $('background-mode').value = theme.background.mode;
+      $('background-color').value = theme.background.color;
+      $('background-image-url').value = theme.background.imageUrl;
+      $('background-fit').value = theme.background.imageFit;
+      $('background-overlay').value = theme.background.overlay;
+      $('background-overlay-value').textContent = Number(theme.background.overlay).toFixed(2);
+      $('branding-use-custom-title').checked = !!theme.branding.useCustomTitle;
+      $('branding-custom-title').value = theme.branding.customTitle;
+      $('branding-show-subtitle').checked = !!theme.branding.showSubtitle;
+      $('branding-custom-subtitle').value = theme.branding.customSubtitle;
+      $('branding-logo-url').value = theme.branding.logoUrl;
+      $('generic-thumb-set').value = theme.thumbnails.genericSet || 'gt_0';
+      $('prefer-custom-thumbnail').checked = !!theme.thumbnails.preferCustomItemThumbnail;
+    }
+
+    function readThemeFromForm() {
+      const colors = {
+        bg: $('text-bg').value.trim() || DEFAULT_THEME.colors.bg,
+        surface: $('text-surface').value.trim() || DEFAULT_THEME.colors.surface,
+        surface2: $('text-surface2').value.trim() || DEFAULT_THEME.colors.surface2,
+        border: $('text-border').value.trim() || DEFAULT_THEME.colors.border,
+        border2: $('text-border2').value.trim() || DEFAULT_THEME.colors.border2,
+        text: $('text-text').value.trim() || DEFAULT_THEME.colors.text,
+        muted: $('text-muted').value.trim() || DEFAULT_THEME.colors.muted,
+        accent: $('text-accent').value.trim() || DEFAULT_THEME.colors.accent,
+        accentDim: $('text-accent-dim').value.trim() || DEFAULT_THEME.colors.accentDim
+      };
+
+      return mergeTheme({
+        version: 1,
+        preset: $('preset-select').value || 'obsidian',
+        colors,
+        background: {
+          mode: $('background-mode').value,
+          color: $('background-color').value.trim() || colors.bg,
+          imageUrl: $('background-image-url').value.trim(),
+          imageFit: $('background-fit').value || 'cover',
+          overlay: Number($('background-overlay').value || 0)
+        },
+        branding: {
+          useCustomTitle: $('branding-use-custom-title').checked,
+          customTitle: $('branding-custom-title').value.trim(),
+          showSubtitle: $('branding-show-subtitle').checked,
+          customSubtitle: $('branding-custom-subtitle').value.trim(),
+          logoUrl: $('branding-logo-url').value.trim()
+        },
+        thumbnails: {
+          genericSet: $('generic-thumb-set').value || 'gt_0',
+          preferCustomItemThumbnail: $('prefer-custom-thumbnail').checked
+        }
+      });
+    }
+
+    function applyPreview(theme) {
+      const t = mergeTheme(theme);
+      currentTheme = t;
+
+      els.previewFrame.style.setProperty('--pv-bg', t.colors.bg);
+      els.previewFrame.style.setProperty('--pv-surface', t.colors.surface);
+      els.previewFrame.style.setProperty('--pv-surface2', t.colors.surface2);
+      els.previewFrame.style.setProperty('--pv-border', t.colors.border);
+      els.previewFrame.style.setProperty('--pv-border2', t.colors.border2);
+      els.previewFrame.style.setProperty('--pv-text', t.colors.text);
+      els.previewFrame.style.setProperty('--pv-muted', t.colors.muted);
+      els.previewFrame.style.setProperty('--pv-accent', t.colors.accent);
+      els.previewFrame.style.setProperty('--pv-accent-dim', t.colors.accentDim);
+
+      if (t.background.mode === 'image' && t.background.imageUrl) {
+        els.previewFrame.style.backgroundImage = `url(${t.background.imageUrl})`;
+        els.previewFrame.style.backgroundColor = t.background.color || t.colors.bg;
+        els.previewFrame.style.backgroundSize = t.background.imageFit || 'cover';
+        els.previewFrame.style.backgroundRepeat = 'no-repeat';
+        els.previewFrame.style.backgroundPosition = 'center';
+      } else {
+        els.previewFrame.style.backgroundImage = 'none';
+        els.previewFrame.style.backgroundColor = t.background.color || t.colors.bg;
+        els.previewFrame.style.backgroundSize = 'cover';
+      }
+
+      const overlayAlpha = Math.max(0, Math.min(0.85, Number(t.background.overlay || 0)));
+      els.previewOverlay.style.background = `rgba(0,0,0,${overlayAlpha})`;
+
+      els.previewTitle.textContent = getTitleForPreview();
+      const subtitle = getSubtitleForPreview();
+      els.previewSubtitle.textContent = subtitle;
+      els.previewSubtitle.style.display = subtitle ? 'block' : 'none';
+
+      const logoUrl = t.branding.logoUrl?.trim();
+      if (logoUrl) {
+        els.previewLogo.innerHTML = `<img src="${logoUrl}" alt="Logo" />`;
+      } else {
+        els.previewLogo.textContent = 'ARC';
+      }
+
+      const thumbLabel = (t.thumbnails.genericSet || 'gt_0').replaceAll('_', ' ');
+      els.pvThumbA.textContent = thumbLabel;
+      els.pvThumbB.textContent = t.thumbnails.preferCustomItemThumbnail ? 'custom > ' + thumbLabel : thumbLabel;
+    }
+
+    function renderDirarcList() {
+      els.dirarcList.innerHTML = '';
+      if (!dirarcs.length) {
+        els.dirarcList.innerHTML = '<div class="muted-box">No se encontraron dirArcs para este usuario.</div>';
+        return;
+      }
+
+      dirarcs.forEach((dirarc) => {
+        const btn = document.createElement('button');
+        btn.className = 'dirarc-item' + (selectedDirarc?.id === dirarc.id ? ' active' : '');
+        btn.innerHTML = `
+          <div class="dirarc-item-title">${escapeHtml(dirarc.title || dirarc.slug || 'Sin título')}</div>
+          <div class="dirarc-item-slug">${escapeHtml(dirarc.slug || 'sin-slug')}</div>
+          <div class="dirarc-item-meta">${dirarc.theme_config ? 'Tiene theme_config guardado' : 'Usando tema por defecto'}</div>
+        `;
+        btn.addEventListener('click', () => selectDirarc(dirarc.id));
+        els.dirarcList.appendChild(btn);
+      });
+    }
+
+    function escapeHtml(str = '') {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function loadDirarcs() {
+  if (!currentUser) return;
+  setMessage(els.saveMessage, '');
+  els.dirarcList.innerHTML = '<div class="muted-box">Cargando dirArcs...</div>';
+
+  const { data, error } = await supabase
+    .from('dirarcs')
+    .select('id, slug, title, description, theme_config, created_at, updated_at')
+    .eq('owner_user_id', currentUser.id)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    els.dirarcList.innerHTML = '<div class="muted-box">Error cargando dirArcs.</div>';
+    setMessage(els.saveMessage, 'Error cargando dirArcs: ' + error.message, 'error');
+    return;
+  }
+
+  dirarcs = data || [];
+
+  if (selectedDirarc) {
+    const fresh = dirarcs.find(d => d.id === selectedDirarc.id);
+    selectedDirarc = fresh || null;
+  }
+
+  renderDirarcList();
+
+  if (!selectedDirarc && dirarcs.length) {
+    selectDirarc(dirarcs[0].id);
+  } else if (!dirarcs.length) {
+    setEditorEnabled(false);
+    els.editorTitle.textContent = 'Configura el tema';
+    els.editorSubtitle.textContent = 'No hay dirArcs disponibles para esta cuenta.';
+    applyPreview(DEFAULT_THEME);
+  }
+}
+
+    function selectDirarc(id) {
+      const dirarc = dirarcs.find(d => d.id === id);
+      if (!dirarc) return;
+      selectedDirarc = dirarc;
+      renderDirarcList();
+      const merged = mergeTheme(dirarc.theme_config || DEFAULT_THEME);
+      currentTheme = merged;
+      fillFormFromTheme(merged);
+      applyPreview(merged);
+      setEditorEnabled(true);
+      els.editorTitle.textContent = dirarc.title || dirarc.slug || 'DirArc';
+      els.editorSubtitle.textContent = dirarc.slug ? `Editando theme_config de ${dirarc.slug}` : 'Editando theme_config del dirArc seleccionado';
+      setMessage(els.saveMessage, '');
+    }
+
+    function applyPreset(key) {
+      const preset = PRESETS[key];
+      if (!preset) return;
+      const next = mergeTheme(structuredCloneSafe(preset.theme));
+      if (selectedDirarc?.theme_config?.branding) {
+        next.branding = {
+          ...next.branding,
+          ...mergeTheme(selectedDirarc.theme_config).branding
+        };
+      }
+      fillFormFromTheme(next);
+      applyPreview(next);
+    }
+
+    async function saveTheme() {
+      if (!currentUser || !selectedDirarc) return;
+      const payload = readThemeFromForm();
+      currentTheme = payload;
+      applyPreview(payload);
+      setMessage(els.saveMessage, 'Guardando tema...', '');
+      els.btnSaveTheme.disabled = true;
+      els.btnSaveThemeBottom.disabled = true;
+
+      const { data, error } = await supabase
+    .from('dirarcs')
+    .update({ theme_config: payload })
+    .eq('id', selectedDirarc.id)
+    .select('id, slug, title, description, theme_config, created_at, updated_at')
+    .single();
+
+      els.btnSaveTheme.disabled = false;
+      els.btnSaveThemeBottom.disabled = false;
+
+      if (error) {
+        setMessage(els.saveMessage, 'Error guardando theme_config: ' + error.message, 'error');
+        return;
+      }
+
+      selectedDirarc = data;
+      dirarcs = dirarcs.map(d => d.id === data.id ? data : d);
+      renderDirarcList();
+      setMessage(els.saveMessage, 'Tema guardado correctamente en theme_config.', 'ok');
+    }
+
+    function resetThemeToPreset() {
+      const presetKey = $('preset-select').value || 'obsidian';
+      const base = PRESETS[presetKey] ? PRESETS[presetKey].theme : DEFAULT_THEME;
+      const next = mergeTheme(structuredCloneSafe(base));
+      if (selectedDirarc) {
+        next.branding.useCustomTitle = false;
+        next.branding.customTitle = '';
+        next.branding.showSubtitle = true;
+        next.branding.customSubtitle = 'Aio Repo C 1.0';
+        next.branding.logoUrl = '';
+      }
+      fillFormFromTheme(next);
+      applyPreview(next);
+      setMessage(els.saveMessage, 'Formulario restablecido al preset actual. Aún no se ha guardado.', 'ok');
+    }
+
+    function attachFormListeners() {
+      Object.values(fieldMap).forEach(([colorId, textId]) => {
+        $(colorId).addEventListener('input', (e) => {
+          $(textId).value = e.target.value;
+          applyPreview(readThemeFromForm());
+        });
+        $(textId).addEventListener('input', () => applyPreview(readThemeFromForm()));
+      });
+
+      [
+        'text-border', 'text-border2', 'text-accent-dim',
+        'background-mode', 'background-color', 'background-image-url', 'background-fit',
+        'branding-use-custom-title', 'branding-custom-title', 'branding-show-subtitle', 'branding-custom-subtitle', 'branding-logo-url',
+        'generic-thumb-set', 'prefer-custom-thumbnail'
+      ].forEach((id) => {
+        $(id).addEventListener('input', () => applyPreview(readThemeFromForm()));
+        $(id).addEventListener('change', () => applyPreview(readThemeFromForm()));
+      });
+
+      $('background-overlay').addEventListener('input', (e) => {
+        $('background-overlay-value').textContent = Number(e.target.value).toFixed(2);
+        applyPreview(readThemeFromForm());
+      });
+
+      $('preset-select').addEventListener('change', (e) => applyPreset(e.target.value));
+    }
+
+    async function attemptLogin() {
+      const email = els.loginEmail.value.trim();
+      const password = els.loginPassword.value.trim();
+      if (!email || !password) {
+        setMessage(els.authMessage, 'Debes escribir email y contraseña.', 'error');
+        return;
+      }
+      setMessage(els.authMessage, 'Iniciando sesión...');
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setMessage(els.authMessage, 'Error al iniciar sesión: ' + error.message, 'error');
+        return;
+      }
+      setMessage(els.authMessage, 'Sesión iniciada.', 'ok');
+      setAuthUI(data.user || null);
+      await loadDirarcs();
+    }
+
+    async function restoreSession() {
       const { data, error } = await supabase.auth.getUser();
-
-      if (error || !data.user) {
-        statusEl.textContent = "Sesión no encontrada";
-        renderMessage(
-          "No se encontró una sesión activa. Abre Aio Dashboard e inicia sesión primero.",
-          true
-        );
+      if (error) {
+        setAuthUI(null);
         return;
       }
-
-      statusEl.innerHTML = `Conectado como <strong>${data.user.email}</strong>`;
-      renderMessage("Cargando DirArcs…");
-
-      const { data: dirarcs, error: dirarcError } = await supabase
-        .from("dirarcs")
-        .select("id, slug, title, theme_config")
-        .eq("owner_user_id", data.user.id)
-        .order("created_at", { ascending: true });
-
-      if (dirarcError) {
-        renderMessage(
-          "Error cargando DirArcs: " + dirarcError.message,
-          true
-        );
-        return;
-      }
-
-      renderDirArcList(dirarcs || []);
+      setAuthUI(data.user || null);
+      if (data.user) await loadDirarcs();
     }
 
-    loadSessionAndDirArcs().catch((err) => {
-      console.error("Theme Lab launcher error", err);
-      renderMessage("Error inesperado cargando Theme Lab.", true);
-      statusEl.textContent = "Error";
-    });
+    async function logout() {
+      await supabase.auth.signOut();
+      setAuthUI(null);
+      setMessage(els.authMessage, 'Sesión cerrada.', 'ok');
+    }
+
+    function bindActions() {
+      $('btn-login').addEventListener('click', attemptLogin);
+      $('btn-check-session').addEventListener('click', restoreSession);
+      els.btnLogout.addEventListener('click', logout);
+      $('btn-reload-dirarcs').addEventListener('click', loadDirarcs);
+      els.btnSaveTheme.addEventListener('click', saveTheme);
+      els.btnSaveThemeBottom.addEventListener('click', saveTheme);
+      els.btnResetTheme.addEventListener('click', resetThemeToPreset);
+      els.btnResetThemeBottom.addEventListener('click', resetThemeToPreset);
+
+      els.loginPassword.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') attemptLogin();
+      });
+    }
+
+    populatePresetSelect();
+    attachFormListeners();
+    bindActions();
+    applyPreview(DEFAULT_THEME);
+    restoreSession();
   </script>
 </body>
 </html>
