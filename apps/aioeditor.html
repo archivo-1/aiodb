@@ -1,5 +1,1405 @@
-<p><strong>App en construcci&oacute;n</strong></p>
-<p>&nbsp;</p>
-<p>Dashboard, pero sin la capa de ui.</p>
-<p>Edici&oacute;n del .json manual.</p>
-<p>"Configuraci&oacute;n avanzada de directorios"</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editor ARC</title>
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: rgba(15, 23, 42, 0.95);
+      --panel-soft: #0f172a;
+      --border-soft: rgba(148, 163, 184, 0.35);
+      --border-strong: rgba(96, 165, 250, 0.9);
+      --text: #e5e7eb;
+      --text-soft: #94a3b8;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.22);
+      --danger: #fca5a5;
+      --ok: #bbf7d0;
+      --warn: #fde68a;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #111827 0, #020617 48%);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    button, input, textarea { font: inherit; }
+
+    button {
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.55rem 0.8rem;
+      cursor: pointer;
+    }
+
+    button:hover { border-color: rgba(96, 165, 250, 0.65); }
+    button.primary {
+      background: linear-gradient(to right, #1d4ed8, #2563eb);
+      border-color: rgba(59, 130, 246, 0.9);
+    }
+    button.danger {
+      color: var(--danger);
+      border-color: rgba(252, 165, 165, 0.35);
+    }
+    button.ghost { background: transparent; }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: #020617;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 280px;
+      line-height: 1.45;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.84rem;
+    }
+
+    header {
+      height: 56px;
+      min-height: 56px;
+      padding: 0 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: rgba(2, 6, 23, 0.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 650;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-title span,
+    .small,
+    .muted {
+      color: var(--text-soft);
+      font-size: 0.8rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    .badge-user {
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0.28rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-soft);
+      font-size: 0.8rem;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .auth-section { padding: 1rem; }
+
+    .auth-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr);
+      gap: 1rem;
+    }
+
+    .auth-card {
+      background: rgba(2, 6, 23, 0.4);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 10px;
+      padding: 0.9rem;
+    }
+
+    .auth-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .field { margin-bottom: 0.7rem; }
+
+    .field label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.82rem;
+      color: var(--text-soft);
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 1rem;
+      min-height: 70vh;
+    }
+
+    .sidebar,
+    .workspace {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar {
+      padding: 0.8rem;
+      gap: 0.8rem;
+    }
+
+    .workspace {
+      padding: 0.8rem;
+      gap: 0.8rem;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .section-head h2,
+    .section-head h3 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .dirarc-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      overflow: auto;
+    }
+
+    .dirarc-item {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0.65rem;
+      background: rgba(2, 6, 23, 0.3);
+      cursor: pointer;
+    }
+
+    .dirarc-item:hover {
+      border-color: rgba(96, 165, 250, 0.45);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .dirarc-item.active {
+      border-color: var(--border-strong);
+      background: rgba(30, 64, 175, 0.3);
+    }
+
+    .dirarc-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dirarc-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.73rem;
+      color: var(--text-soft);
+    }
+
+    .workspace-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .workspace-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .items-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 0.2rem;
+    }
+
+    .item-card {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      background: rgba(2, 6, 23, 0.35);
+      overflow: hidden;
+    }
+
+    .item-card.unsaved {
+      border-color: rgba(250, 204, 21, 0.55);
+      box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.18) inset;
+    }
+
+    .item-summary {
+      padding: 0.8rem 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.8rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .item-summary-left { min-width: 0; }
+
+    .item-title {
+      font-size: 0.92rem;
+      font-weight: 650;
+      margin-bottom: 0.18rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-soft);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .item-body {
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .item-hint {
+      font-size: 0.77rem;
+      color: var(--text-soft);
+      line-height: 1.45;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .result {
+      font-size: 0.8rem;
+      min-height: 1rem;
+    }
+
+    .result.error { color: var(--danger); }
+    .result.ok { color: var(--ok); }
+    .result.warn { color: var(--warn); }
+
+    .empty-state {
+      padding: 1rem;
+      border: 1px dashed rgba(148, 163, 184, 0.25);
+      border-radius: 12px;
+      color: var(--text-soft);
+      background: rgba(2, 6, 23, 0.22);
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      .app-shell { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .auth-grid { grid-template-columns: 1fr; }
+      header { padding: 0 0.7rem; }
+      .badge-user { max-width: 120px; }
+      .item-summary { flex-direction: column; }
+      .workspace-actions,
+      .item-actions { width: 100%; }
+      .workspace-actions button,
+      .item-actions button { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">
+      <h1>Editor ARC</h1>
+      <span>Editor avanzado de dirarcs con JSON limitado</span>
+    </div>
+    <div class="header-right">
+      <div id="user-badge" class="badge-user hidden"></div>
+      <button id="btn-logout" class="ghost hidden">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="auth-section" class="panel auth-section">
+      <div class="section-head" style="margin-bottom: 0.9rem;">
+        <div>
+          <h2>Acceso</h2>
+          <div class="small">
+            Este editor es solo para uso avanzado. Modifica directamente el JSON de los contenedores de tus dirarcs.
+          </div>
+        </div>
+      </div>
+      <div class="auth-grid">
+        <div class="auth-card">
+          <h3>Iniciar sesión</h3>
+          <p class="small" style="margin-bottom:0.8rem;">
+            Usa la misma cuenta del dashboard principal. Para crear cuentas nuevas o gestionar dirarcs de forma normal,
+            abre el dashboard estándar de Aio Repo C.
+          </p>
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input id="login-email" type="email" />
+          </div>
+          <div class="field">
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" type="password" />
+          </div>
+          <button id="btn-login" class="primary">Iniciar sesión</button>
+          <div id="login-result" class="result" style="margin-top:0.65rem;"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="app-shell" class="app-shell hidden">
+      <aside class="panel sidebar">
+        <div class="section-head">
+          <div>
+            <h2>Mis dirARCs</h2>
+            <div class="small">Selecciona un dirARC existente para editar sus contenedores.</div>
+          </div>
+        </div>
+        <ul id="dirarc-list" class="dirarc-list"></ul>
+        <div id="dirarc-list-result" class="result"></div>
+      </aside>
+
+      <section class="panel workspace">
+        <div class="workspace-top">
+          <div>
+            <h2 id="workspace-title" style="margin:0; font-size:1rem;">Ningún dirARC seleccionado</h2>
+            <div id="workspace-subtitle" class="small">Inicia sesión y selecciona un dirarc.</div>
+          </div>
+          <div class="workspace-actions">
+            <button id="btn-add-item" disabled>Nuevo item</button>
+            <button id="btn-save-all" disabled>Guardar todos</button>
+          </div>
+        </div>
+
+        <div id="workspace-status" class="result"></div>
+
+        <div id="items-wrap" class="items-wrap">
+          <div class="empty-state">Selecciona un dirarc para ver sus items en formato JSON limitado.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    // ============================================================
+    // CONFIG BASE
+    // ============================================================
+    const SUPABASE_URL = 'https://zihojlqhxfxdjahgrbwy.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_TZeZu-g4BDlcdXOfWpUG_Q_rN-Sur8t';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+    let currentDirArc = null;
+    let dirarcsCache = [];
+    let itemsCache = [];
+    let isCreatingDirArc = false;
+
+    const $ = (id) => document.getElementById(id);
+
+    // ============================================================
+    // UTILIDADES GENERALES
+    // ============================================================
+    function setResult(el, message = '', type = '') {
+      if (!el) return;
+      el.textContent = message;
+      el.className = 'result';
+      if (type) el.classList.add(type);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function prettyJson(obj) {
+      return JSON.stringify(obj, null, 2);
+    }
+
+    function nowIso() {
+      return new Date().toISOString();
+    }
+
+    function generateUUID() {
+      return crypto.randomUUID();
+    }
+
+    function slugify(text = '') {
+      return text
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
+    }
+
+    function safeJsonParse(text) {
+      try {
+        return { ok: true, data: JSON.parse(text) };
+      } catch (error) {
+        return { ok: false, error };
+      }
+    }
+
+    function nextItemId(slug, items) {
+      const safeSlug = slugify(slug || 'dirarc') || 'dirarc';
+      const numbers = items
+        .map((it) => String(it.item_id || ''))
+        .map((raw) => {
+          const match = raw.match(/_(\d+)$/);
+          return match ? Number(match[1]) : 0;
+        });
+      const next = (Math.max(0, ...numbers) + 1).toString().padStart(3, '0');
+      return `${safeSlug}_${next}`;
+    }
+
+    // ============================================================
+    // CLASIFICACIÓN / NORMALIZACIÓN
+    // ============================================================
+    function normalizeExternalUrl(original) {
+      const raw = (original || '').trim();
+      if (!raw) return '';
+
+      try {
+        const url = new URL(raw);
+
+        // Dropbox -> dl.dropboxusercontent.com + raw=1
+        if (url.hostname.includes('dropbox.com')) {
+          url.hostname = 'dl.dropboxusercontent.com';
+          url.searchParams.set('raw', '1');
+          url.searchParams.delete('dl');
+          return url.toString();
+        }
+
+        // Google Drive -> export=download
+        if (url.hostname.includes('drive.google.com')) {
+          const m = url.pathname.match(/file\/d\/([^/]+)\/view/);
+          if (m && m[1]) {
+            const fileId = m[1];
+            return `https://drive.google.com/uc?export=download&id=${fileId}`;
+          }
+
+          if (url.pathname.startsWith('/uc')) {
+            url.searchParams.set('export', 'download');
+            return url.toString();
+          }
+
+          return raw;
+        }
+
+        // Resto: devolvemos tal cual
+        return raw;
+      } catch {
+        return raw;
+      }
+    }
+
+    function isYoutubeurl(url) {
+      return /youtube\.com\/watch\?v=|youtu\.be\//i.test(url || '');
+    }
+
+    function isVimeourl(url) {
+      return /vimeo\.com\//i.test(url || '');
+    }
+
+    function isStorageurl(url) {
+      return /(dropbox\.com|dl\.dropboxusercontent\.com|drive\.google\.com|supabase\.co|raw\.githubusercontent\.com)/i.test(url || '');
+    }
+
+    function inferMetaFromUrl(url) {
+      const safe = (url || '').split('#')[0].split('?')[0];
+      const lower = safe.toLowerCase();
+
+      // 1) Documentos / texto
+      if (lower.endsWith('.pdf')) {
+        return {
+          visor: 'media',
+          categoria: 'pdf',
+          thumbnail: 'thumbnails/gt_pdf.png',
+          icon: 'P'
+        };
+      }
+
+      if (lower.endsWith('.txt')) {
+        return {
+          visor: 'media',
+          categoria: 'txt',
+          thumbnail: 'thumbnails/gt_txt.png',
+          icon: 'TXT'
+        };
+      }
+
+      if (lower.endsWith('.md')) {
+        return {
+          visor: 'media',
+          categoria: 'md',
+          thumbnail: 'thumbnails/gt_md.png',
+          icon: 'MD'
+        };
+      }
+
+      // 2) BIM / 3D
+      if (lower.endsWith('.ifc')) {
+        return {
+          visor: 'ifc',
+          categoria: 'modelo-BIM',
+          thumbnail: 'thumbnails/gt_ifc.png',
+          icon: 'I'
+        };
+      }
+
+      if (lower.endsWith('.3dm')) {
+        return {
+          visor: '3dm',
+          categoria: 'modelo-3d',
+          thumbnail: 'thumbnails/gt_3dm.png',
+          icon: '3'
+        };
+      }
+
+      if (lower.endsWith('.dxf')) {
+        return {
+          visor: 'dxf',
+          categoria: 'plano-2d',
+          thumbnail: 'thumbnails/gt_dxf.png',
+          icon: 'D'
+        };
+      }
+
+      if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
+        return {
+          visor: 'glb',
+          categoria: 'modelo-3d',
+          thumbnail: 'thumbnails/gt_glb.png',
+          icon: 'G'
+        };
+      }
+
+      // 3) Imágenes, vídeo, audio
+      if (/\.(jpg|jpeg|png|webp|gif)$/i.test(lower)) {
+        return {
+          visor: 'media',
+          categoria: 'imagen',
+          thumbnail: 'thumbnails/gt_IMG.png',
+          icon: 'IMG'
+        };
+      }
+
+      if (/\.(mp4|webm|mov)$/i.test(lower)) {
+        return {
+          visor: 'media',
+          categoria: 'video',
+          thumbnail: 'thumbnails/gt_video.png',
+          icon: 'V'
+        };
+      }
+
+      if (/\.(mp3|wav|ogg)$/i.test(lower)) {
+        return {
+          visor: 'media',
+          categoria: 'audio',
+          thumbnail: 'thumbnails/gt_audio.png',
+          icon: 'A'
+        };
+      }
+
+      // 4) GeoJSON / mapas
+      if (lower.endsWith('.geojson') || lower.endsWith('.json')) {
+        return {
+          visor: 'map',
+          categoria: 'mapa',
+          thumbnail: 'thumbnails/gt_map.png',
+          icon: 'M'
+        };
+      }
+
+      // 5) Fallback genérico
+      return {
+        visor: 'media',
+        categoria: 'otro',
+        thumbnail: 'thumbnails/gt_0.png',
+        icon: ''
+      };
+    }
+
+    function classifyUrlForMedia(originalUrl, useIframeFlag = false) {
+      const url = String(originalUrl || '').trim();
+      if (!url) {
+        return {
+          visor: 'media',
+          categoria: 'otro',
+          thumbnail: 'thumbnails/gt_0.png',
+          icon: ''
+        };
+      }
+
+      // YouTube / Vimeo incrustados
+      if (isYoutubeurl(url) || isVimeourl(url)) {
+        return {
+          visor: 'media',
+          categoria: 'ytvm',
+          thumbnail: 'thumbnails/gt_videoext.png',
+          icon: 'V'
+        };
+      }
+
+      // Google Docs / Sheets / Slides publicados
+      if (/^https?:\/\/docs\.google\.com/i.test(url)) {
+        try {
+          const u = new URL(url);
+          const path = u.pathname || '';
+
+          if (path.startsWith('/document')) {
+            return {
+              visor: 'media',
+              categoria: 'gdoc',
+              thumbnail: 'thumbnails/gt_gdoc.png',
+              icon: 'Gd'
+            };
+          }
+
+          if (path.startsWith('/spreadsheets')) {
+            return {
+              visor: 'media',
+              categoria: 'gsheet',
+              thumbnail: 'thumbnails/gt_gsheet.png',
+              icon: 'Gs'
+            };
+          }
+
+          if (path.startsWith('/presentation')) {
+            return {
+              visor: 'media',
+              categoria: 'gslide',
+              thumbnail: 'thumbnails/gt_gslide.png',
+              icon: 'Gp'
+            };
+          }
+
+          return {
+            visor: 'media',
+            categoria: 'enlace',
+            thumbnail: 'thumbnails/gt_WEB.png',
+            icon: ''
+          };
+        } catch {
+          return {
+            visor: 'media',
+            categoria: 'enlace',
+            thumbnail: 'thumbnails/gt_WEB.png',
+            icon: ''
+          };
+        }
+      }
+
+      // URLs de almacenamiento conocidas (Dropbox, Drive, Supabase, GitHub raw)
+      if (isStorageurl(url)) {
+        const meta = inferMetaFromUrl(url);
+        return {
+          visor: meta.visor,
+          categoria: meta.categoria,
+          thumbnail: meta.thumbnail,
+          icon: meta.icon
+        };
+      }
+
+      // Si no parece URL http(s), fallback
+      if (!/^https?:/i.test(url)) {
+        return {
+          visor: 'media',
+          categoria: 'otro',
+          thumbnail: 'thumbnails/gt_0.png',
+          icon: ''
+        };
+      }
+
+      // Tratamos como enlace “normal”
+      if (useIframeFlag) {
+        return {
+          visor: 'media',
+          categoria: 'enlace',
+          thumbnail: 'thumbnails/gt_WEB.png',
+          icon: ''
+        };
+      }
+
+      return {
+        visor: 'media',
+        categoria: 'enlaceEXT',
+        thumbnail: 'thumbnails/gt_webext.png',
+        icon: ''
+      };
+    }
+
+    // ============================================================
+    // MODELO LIMITADO
+    // ============================================================
+    function toLimitedItem(fullItem) {
+  return {
+    nombre: fullItem.nombre ?? '',
+    visor: fullItem.visor ?? 'media',
+    categoria: fullItem.categoria ?? 'otro',
+    coleccion: fullItem.coleccion ?? '',
+    archivo: fullItem.archivo ?? fullItem.resolved_url ?? fullItem.resolvedurl ?? '',
+    resolved_url: fullItem.resolved_url ?? fullItem.resolvedurl ?? fullItem.archivo ?? '',
+    descripcion: fullItem.descripcion ?? '',
+    tamano: fullItem.tamano ?? '',
+    thumbnail: fullItem.thumbnail ?? 'thumbnails/gt_0.png',
+    ui_config: fullItem.ui_config ?? fullItem.uiconfig ?? null,
+    lat: fullItem.lat ?? null,
+    lon: fullItem.lon ?? null,
+    zoom: fullItem.zoom ?? null,
+    order_index: fullItem.order_index ?? 0
+  };
+}
+    function fromLimitedItem(limited, originalFullItem = {}) {
+  let archivo = String(limited.archivo ?? '').trim();
+  let resolvedUrl = String(limited.resolved_url ?? '').trim();
+
+  if (!archivo && resolvedUrl) {
+    archivo = resolvedUrl;
+  }
+
+  if (!resolvedUrl && archivo) {
+    resolvedUrl = normalizeExternalUrl(archivo);
+  }
+
+  const merged = {
+    ...originalFullItem,
+    nombre: limited.nombre ?? '',
+    visor: limited.visor ?? originalFullItem.visor ?? 'media',
+    categoria: limited.categoria ?? originalFullItem.categoria ?? 'otro',
+    coleccion: limited.coleccion ?? '',
+    archivo,
+    resolved_url: resolvedUrl,
+    descripcion: limited.descripcion ?? '',
+    tamano: limited.tamano ?? null,
+    thumbnail: limited.thumbnail ?? originalFullItem.thumbnail ?? 'thumbnails/gt_0.png',
+    ui_config: limited.ui_config ?? null,
+    lat: limited.lat ?? null,
+    lon: limited.lon ?? null,
+    zoom: limited.zoom ?? null,
+    order_index: Number.isFinite(Number(limited.order_index)) ? Number(limited.order_index) : 0,
+    source: originalFullItem.source ?? (resolvedUrl.startsWith('http') ? 'url' : 'local'),
+    collection_id: originalFullItem.collection_id ?? null
+  };
+
+  return merged;
+}
+
+    function createNewItemFull() {
+      const slug = currentDirArc?.slug || 'dirarc';
+      const time = nowIso();
+      return {
+        id: generateUUID(),
+        collection_id: null,
+        item_id: nextItemId(slug, itemsCache),
+        nombre: 'Nuevo item',
+        visor: 'media',
+        categoria: 'otro',
+        coleccion: '',
+        source: 'url',
+        archivo: '',
+        resolved_url: '',
+        descripcion: '',
+        tamano: null,
+        thumbnail: 'thumbnails/gt_0.png',
+        ui_config: null,
+        lat: null,
+        lon: null,
+        zoom: null,
+        order_index: itemsCache.length,
+        created_at: time,
+        updated_at: time,
+        dirarc_id: currentDirArc?.id || null,
+        __isNew: true,
+        __dirty: true,
+        __result: ''
+      };
+    }
+
+    // ============================================================
+    // UI DE SESIÓN
+    // ============================================================
+    function setAuthUI(user) {
+      currentUser = user || null;
+      const loggedIn = !!currentUser;
+      $('auth-section').classList.toggle('hidden', loggedIn);
+      $('app-shell').classList.toggle('hidden', !loggedIn);
+      $('user-badge').classList.toggle('hidden', !loggedIn);
+      $('btn-logout').classList.toggle('hidden', !loggedIn);
+      $('user-badge').textContent = loggedIn ? (currentUser.email || currentUser.id) : '';
+
+      if (!loggedIn) {
+        currentDirArc = null;
+        dirarcsCache = [];
+        itemsCache = [];
+        renderDirArcList();
+        renderWorkspace();
+      }
+    }
+
+    async function loadSession() {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.warn('Error obteniendo usuario:', error.message);
+        setAuthUI(null);
+        return;
+      }
+      setAuthUI(data.user || null);
+      if (data.user) {
+        await loadDirArcs();
+      }
+    }
+
+    // ============================================================
+    // AUTH (solo login)
+    // ============================================================
+    async function logIn() {
+      const email = $('login-email').value.trim();
+      const password = $('login-password').value.trim();
+      if (!email || !password) {
+        setResult($('login-result'), 'Email y contraseña son obligatorios.', 'error');
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setResult($('login-result'), `Error al iniciar sesión: ${error.message}`, 'error');
+        return;
+      }
+      setResult($('login-result'), 'Sesión iniciada.', 'ok');
+      setAuthUI(data.user || null);
+      await loadDirArcs();
+    }
+
+    async function logOut() {
+      await supabase.auth.signOut();
+      setAuthUI(null);
+      setResult($('login-result'), 'Sesión cerrada.', 'ok');
+    }
+
+    // ============================================================
+    // DIRARCS (solo lectura/selección)
+    // ============================================================
+    async function loadDirArcs() {
+      if (!currentUser) return;
+      setResult($('dirarc-list-result'), 'Cargando dirARCs...');
+
+      const { data, error } = await supabase
+        .from('dirarcs')
+        .select('*')
+        .eq('owner_user_id', currentUser.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error(error);
+        setResult($('dirarc-list-result'), `Error cargando dirARCs: ${error.message}`, 'error');
+        return;
+      }
+
+      dirarcsCache = data || [];
+      setResult($('dirarc-list-result'), '');
+
+      if (!dirarcsCache.length) {
+        currentDirArc = null;
+        itemsCache = [];
+        renderDirArcList();
+        renderWorkspace();
+        return;
+      }
+
+      if (!currentDirArc) {
+        currentDirArc = dirarcsCache[0];
+      } else {
+        const fresh = dirarcsCache.find((d) => d.id === currentDirArc.id);
+        currentDirArc = fresh || dirarcsCache[0];
+      }
+
+      renderDirArcList();
+      await loadItemsForCurrentDirArc();
+    }
+
+    function renderDirArcList() {
+      const list = $('dirarc-list');
+      list.innerHTML = '';
+
+      if (!dirarcsCache.length) {
+        list.innerHTML = '<li class="empty-state">No tienes dirARCs todavía. Crea y gestiona dirARCs desde el dashboard principal.</li>';
+        return;
+      }
+
+      dirarcsCache.forEach((dirarc) => {
+        const li = document.createElement('li');
+        li.className = `dirarc-item ${currentDirArc?.id === dirarc.id ? 'active' : ''}`;
+        li.innerHTML = `
+          <div class="dirarc-name">${escapeHtml(dirarc.title || dirarc.slug || 'Sin título')}</div>
+          <div class="dirarc-meta">
+            <span>${escapeHtml(dirarc.slug || '')}</span>
+            <span>${escapeHtml(String(dirarc.items_count ?? ''))}</span>
+          </div>
+        `;
+        li.onclick = async () => {
+          currentDirArc = dirarc;
+          renderDirArcList();
+          await loadItemsForCurrentDirArc();
+        };
+        list.appendChild(li);
+      });
+    }
+
+    // ============================================================
+    // ITEMS
+    // ============================================================
+    async function loadItemsForCurrentDirArc() {
+      if (!currentDirArc?.id) {
+        itemsCache = [];
+        renderWorkspace();
+        return;
+      }
+
+      setResult($('workspace-status'), 'Cargando items...');
+
+      const { data, error } = await supabase
+        .from('items')
+        .select('*')
+        .eq('dirarc_id', currentDirArc.id)
+        .order('coleccion', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error(error);
+        itemsCache = [];
+        renderWorkspace();
+        setResult($('workspace-status'), `Error cargando items: ${error.message}`, 'error');
+        return;
+      }
+
+      itemsCache = (data || []).map((item) => ({
+        ...item,
+        resolved_url: item.resolved_url ?? item.resolvedurl ?? item.archivo ?? '',
+        ui_config: item.ui_config ?? item.uiconfig ?? null,
+        __isNew: false,
+        __dirty: false,
+        __result: ''
+      }));
+
+      renderWorkspace();
+      setResult($('workspace-status'), '');
+    }
+
+    function addNewItem() {
+      if (!currentDirArc) return;
+      const item = createNewItemFull();
+      itemsCache.push(item);
+      renderWorkspace();
+    }
+
+    function removeItemById(itemId) {
+      const item = itemsCache.find((it) => it.id === itemId);
+      if (!item) return;
+
+      if (!item.__isNew) {
+        const ok = confirm(`Quitar este item del dirARC?\n\n${item.nombre || item.item_id}`);
+        if (!ok) return;
+      }
+
+      if (item.__isNew) {
+        itemsCache = itemsCache.filter((it) => it.id !== itemId);
+        renderWorkspace();
+        return;
+      }
+
+      deletePersistedItem(itemId);
+    }
+
+    async function deletePersistedItem(itemId) {
+      setResult($('workspace-status'), 'Eliminando item...');
+      const { error } = await supabase.from('items').delete().eq('id', itemId);
+      if (error) {
+        setResult($('workspace-status'), `Error eliminando item: ${error.message}`, 'error');
+        return;
+      }
+      itemsCache = itemsCache.filter((it) => it.id !== itemId);
+      renderWorkspace();
+      setResult($('workspace-status'), 'Item eliminado.', 'ok');
+    }
+
+    function getCardTextarea(itemId) {
+      return document.querySelector(`textarea[data-item-id="${CSS.escape(itemId)}"]`);
+    }
+
+    function markItemDirty(itemId, dirty = true) {
+      const item = itemsCache.find((it) => it.id === itemId);
+      if (!item) return;
+      item.__dirty = dirty;
+      const card = document.querySelector(`.item-card[data-item-id="${CSS.escape(itemId)}"]`);
+      if (card) card.classList.toggle('unsaved', dirty);
+    }
+
+    function autoFillItemFromResolvedUrl(itemId) {
+  const item = itemsCache.find((it) => it.id === itemId);
+  if (!item) return;
+
+  const textarea = getCardTextarea(itemId);
+  if (!textarea) return;
+
+  const parsed = safeJsonParse(textarea.value);
+  if (!parsed.ok || typeof parsed.data !== 'object' || Array.isArray(parsed.data)) {
+    item.__result = 'JSON inválido. Corrígelo antes de autocompletar.';
+    renderWorkspace();
+    return;
+  }
+
+  const limited = parsed.data;
+
+  let archivo = String(limited.archivo ?? '').trim();
+  let resolved = String(limited.resolved_url ?? '').trim();
+
+  if (!archivo && !resolved) {
+    item.__result = 'Debes indicar al menos archivo o resolved_url.';
+    renderWorkspace();
+    return;
+  }
+
+  if (!archivo && resolved) {
+    archivo = resolved;
+  }
+
+  if (!resolved && archivo) {
+    resolved = normalizeExternalUrl(archivo);
+  }
+
+  const meta = classifyUrlForMedia(resolved, false);
+
+  limited.archivo = archivo;
+  limited.resolved_url = resolved;
+
+  if (!limited.visor) limited.visor = meta.visor;
+  if (!limited.categoria) limited.categoria = meta.categoria;
+  if (!limited.thumbnail) limited.thumbnail = meta.thumbnail;
+
+  const merged = fromLimitedItem(limited, item);
+
+  Object.assign(item, merged, {
+    __dirty: true,
+    __result: 'Metadatos autocompletados desde la URL efectiva.'
+  });
+
+  renderWorkspace();
+}
+   async function saveItem(itemId) {
+  const item = itemsCache.find((it) => it.id === itemId);
+  if (!item || !currentDirArc) return;
+
+  const textarea = getCardTextarea(itemId);
+  if (!textarea) return;
+
+  const parsed = safeJsonParse(textarea.value);
+  if (!parsed.ok || typeof parsed.data !== 'object' || Array.isArray(parsed.data)) {
+    item.__result = `JSON inválido: ${parsed.error.message}`;
+    renderWorkspace();
+    return;
+  }
+
+  const limited = parsed.data;
+  const merged = fromLimitedItem(limited, item);
+
+  if (!merged.nombre || (!merged.archivo && !merged.resolved_url)) {
+    item.__result = 'Cada item necesita al menos nombre y una URL en archivo o resolved_url.';
+    renderWorkspace();
+    return;
+  }
+
+  if (!merged.archivo && merged.resolved_url) {
+    merged.archivo = merged.resolved_url;
+  }
+
+  if (!merged.resolved_url && merged.archivo) {
+    merged.resolved_url = normalizeExternalUrl(merged.archivo);
+  }
+
+  const metaSource = merged.resolved_url || merged.archivo;
+  const meta = classifyUrlForMedia(metaSource, false);
+
+  if (!limited.visor) merged.visor = meta.visor;
+  if (!limited.categoria) merged.categoria = meta.categoria;
+  if (!limited.thumbnail) merged.thumbnail = meta.thumbnail;
+
+  merged.dirarc_id = currentDirArc.id;
+  merged.updated_at = nowIso();
+
+  const isNew = !!item.__isNew;
+  if (isNew) {
+    merged.created_at = merged.created_at || merged.updated_at;
+    merged.item_id = merged.item_id || nextItemId(currentDirArc.slug, itemsCache);
+    merged.id = merged.id || generateUUID();
+    merged.collection_id = merged.collection_id ?? null;
+  }
+
+  const payload = {
+    id: merged.id,
+    collection_id: merged.collection_id ?? null,
+    item_id: merged.item_id,
+    nombre: merged.nombre,
+    visor: merged.visor,
+    categoria: merged.categoria,
+    coleccion: merged.coleccion,
+    source: merged.source ?? 'url',
+    archivo: merged.archivo,
+    resolved_url: merged.resolved_url,
+    descripcion: merged.descripcion,
+    tamano: merged.tamano ?? null,
+    thumbnail: merged.thumbnail,
+    ui_config: merged.ui_config ?? null,
+    lat: merged.lat ?? null,
+    lon: merged.lon ?? null,
+    zoom: merged.zoom ?? null,
+    order_index: merged.order_index ?? 0,
+    created_at: merged.created_at,
+    updated_at: merged.updated_at,
+    dirarc_id: merged.dirarc_id
+  };
+
+  let response;
+  if (isNew) {
+    response = await supabase.from('items').insert(payload).select().single();
+  } else {
+    response = await supabase.from('items').update(payload).eq('id', item.id).select().single();
+  }
+
+  if (response.error) {
+    item.__result = `Error guardando item: ${response.error.message}`;
+    renderWorkspace();
+    return;
+  }
+
+  const fresh = {
+    ...response.data,
+    resolved_url: response.data.resolved_url ?? response.data.resolvedurl ?? response.data.archivo ?? '',
+    ui_config: response.data.ui_config ?? response.data.uiconfig ?? null,
+    __isNew: false,
+    __dirty: false,
+    __result: 'Item guardado.'
+  };
+
+  itemsCache = itemsCache.map((it) => (it.id === itemId ? fresh : it));
+  renderWorkspace();
+}
+
+    async function saveAllItems() {
+      for (const item of [...itemsCache]) {
+        if (item.__dirty || item.__isNew) {
+          await saveItem(item.id);
+        }
+      }
+      setResult($('workspace-status'), 'Guardado completo finalizado.', 'ok');
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderWorkspace() {
+      const hasDirArc = !!currentDirArc;
+      $('btn-add-item').disabled = !hasDirArc || !currentDirArc?.id;
+      $('btn-save-all').disabled = !hasDirArc || !currentDirArc?.id || !itemsCache.length;
+
+      if (!hasDirArc) {
+        $('workspace-title').textContent = 'Ningún dirARC seleccionado';
+        $('workspace-subtitle').textContent = 'Inicia sesión y selecciona un dirarc.';
+        $('items-wrap').innerHTML = '<div class="empty-state">Selecciona un dirarc para ver sus items en formato JSON limitado.</div>';
+        return;
+      }
+
+      $('workspace-title').textContent = currentDirArc.title || currentDirArc.slug || 'dirARC activo';
+      $('workspace-subtitle').textContent = currentDirArc.slug ? `slug: ${currentDirArc.slug}` : 'DirARC sin slug definido';
+
+      renderItems();
+    }
+
+    function renderItems() {
+      const wrap = $('items-wrap');
+      wrap.innerHTML = '';
+
+      if (!currentDirArc?.id && !isCreatingDirArc) {
+        wrap.innerHTML = '<div class="empty-state">Selecciona un dirarc válido.</div>';
+        return;
+      }
+
+      if (!itemsCache.length) {
+        wrap.innerHTML = '<div class="empty-state">Este dirARC no tiene items todavía. Usa “Nuevo item”.</div>';
+        return;
+      }
+
+      itemsCache.forEach((item) => {
+        const limited = toLimitedItem(item);
+        const card = document.createElement('article');
+        card.className = `item-card ${item.__dirty || item.__isNew ? 'unsaved' : ''}`;
+        card.dataset.itemId = item.id;
+
+        const subtitleParts = [
+          item.item_id || 'sin item_id',
+          limited.categoria || 'sin categoría',
+          limited.coleccion || 'sin colección'
+        ].filter(Boolean);
+
+        card.innerHTML = `
+          <div class="item-summary">
+            <div class="item-summary-left">
+              <div class="item-title">${escapeHtml(limited.nombre || 'Nuevo item')}</div>
+              <div class="item-subtitle">
+                ${subtitleParts.map((part) => `<span>${escapeHtml(part)}</span>`).join('')}
+              </div>
+            </div>
+            <div class="item-actions">
+              <button type="button" data-action="autofill">Autocompletar</button>
+              <button type="button" class="primary" data-action="save">Guardar</button>
+              <button type="button" class="danger" data-action="remove">Quitar</button>
+            </div>
+          </div>
+          <div class="item-body">
+            <div class="item-hint">
+              JSON limitado editable. Campos internos como <code>id</code>, <code>item_id</code>, <code>dirarc_id</code>, <code>created_at</code>, <code>updated_at</code> y <code>archivo</code> permanecen ocultos.
+            </div>
+            <textarea data-item-id="${escapeHtml(item.id)}">${escapeHtml(prettyJson(limited))}</textarea>
+            <div class="status-row">
+              <div class="result ${
+                item.__result?.startsWith('Error') || item.__result?.startsWith('JSON inválido')
+                  ? 'error'
+                  : (item.__result ? 'ok' : '')
+              }">${escapeHtml(item.__result || '')}</div>
+              <div class="small">archivo interno = resolved_url</div>
+            </div>
+          </div>
+        `;
+
+        const textarea = card.querySelector('textarea');
+        textarea.addEventListener('input', () => {
+  markItemDirty(item.id, true);
+
+  const parsed = safeJsonParse(textarea.value);
+  if (parsed.ok && typeof parsed.data === 'object' && !Array.isArray(parsed.data)) {
+    const merged = fromLimitedItem(parsed.data, item);
+    Object.assign(item, merged);
+  }
+});
+
+        card.querySelector('[data-action="autofill"]').onclick = () => autoFillItemFromResolvedUrl(item.id);
+        card.querySelector('[data-action="save"]').onclick = () => saveItem(item.id);
+        card.querySelector('[data-action="remove"]').onclick = () => removeItemById(item.id);
+
+        wrap.appendChild(card);
+      });
+    }
+
+    // ============================================================
+    // EVENTOS
+    // ============================================================
+    $('btn-login').onclick = logIn;
+    $('btn-logout').onclick = logOut;
+    $('btn-add-item').onclick = addNewItem;
+    $('btn-save-all').onclick = saveAllItems;
+
+    // ============================================================
+    // BOOT
+    // ============================================================
+    renderDirArcList();
+    renderWorkspace();
+    loadSession();
+  </script>
+</body>
+</html>
