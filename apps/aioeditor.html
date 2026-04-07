@@ -831,9 +831,9 @@
     function toLimitedItem(fullItem) {
   return {
     nombre: fullItem.nombre ?? '',
-    visor: fullItem.visor ?? 'media',
-    categoria: fullItem.categoria ?? 'otro',
-    coleccion: fullItem.coleccion ?? '',
+    visor: fullItem.visor ?? '',
+    categoria: fullItem.categoria ?? '',
+    coleccion: fullItem.coleccion ?? 'Nueva colección',
     archivo: fullItem.archivo ?? fullItem.resolved_url ?? fullItem.resolvedurl ?? '',
     resolved_url: fullItem.resolved_url ?? fullItem.resolvedurl ?? fullItem.archivo ?? '',
     descripcion: fullItem.descripcion ?? '',
@@ -842,11 +842,11 @@
     ui_config: fullItem.ui_config ?? fullItem.uiconfig ?? null,
     lat: fullItem.lat ?? null,
     lon: fullItem.lon ?? null,
-    zoom: fullItem.zoom ?? null,
-    order_index: fullItem.order_index ?? 0
+    zoom: fullItem.zoom ?? null
   };
 }
-    function fromLimitedItem(limited, originalFullItem = {}) {
+
+function fromLimitedItem(limited, originalFullItem = {}) {
   let archivo = String(limited.archivo ?? '').trim();
   let resolvedUrl = String(limited.resolved_url ?? '').trim();
 
@@ -861,9 +861,9 @@
   const merged = {
     ...originalFullItem,
     nombre: limited.nombre ?? '',
-    visor: limited.visor ?? originalFullItem.visor ?? 'media',
-    categoria: limited.categoria ?? originalFullItem.categoria ?? 'otro',
-    coleccion: limited.coleccion ?? '',
+    visor: limited.visor ?? originalFullItem.visor ?? '',
+    categoria: limited.categoria ?? originalFullItem.categoria ?? '',
+    coleccion: limited.coleccion ?? 'Nueva colección',
     archivo,
     resolved_url: resolvedUrl,
     descripcion: limited.descripcion ?? '',
@@ -873,7 +873,7 @@
     lat: limited.lat ?? null,
     lon: limited.lon ?? null,
     zoom: limited.zoom ?? null,
-    order_index: Number.isFinite(Number(limited.order_index)) ? Number(limited.order_index) : 0,
+    order_index: originalFullItem.order_index ?? 0,
     source: originalFullItem.source ?? (resolvedUrl.startsWith('http') ? 'url' : 'local'),
     collection_id: originalFullItem.collection_id ?? null
   };
