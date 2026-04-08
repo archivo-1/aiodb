@@ -384,15 +384,15 @@
     }
 
     .pv-header {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--pv-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      background: color-mix(in srgb, var(--pv-bg) 86%, transparent);
-    }
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--pv-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--pv-surface);
+}
 
     .pv-brand {
       display: flex;
@@ -484,7 +484,7 @@
     .pv-collection {
       border-radius: 14px;
       overflow: hidden;
-      background: color-mix(in srgb, var(--pv-surface2) 55%, transparent);
+      background: rgba(255,255,255,0.02);
       border: 1px solid var(--pv-border);
     }
     .pv-collection-head {
@@ -545,13 +545,13 @@
     .pv-card-title {
       font-size: 0.88rem;
       font-weight: 700;
-      color: #f3f7fc;
+      color: var(--pv-title-strong);
     }
     .pv-badge {
       border-radius: 999px;
       padding: 0.18rem 0.46rem;
       border: 1px solid var(--pv-border);
-      background: rgba(255,255,255,0.04);
+      background: var(--pv-surface2);
       color: var(--pv-muted);
       font-size: 0.64rem;
       text-transform: uppercase;
@@ -687,17 +687,11 @@
   border-color: color-mix(in srgb, var(--pv-accent) 35%, transparent);
 }
 
-.pv-brand h4 {
-  color: var(--pv-title-strong);
-}
+.pv-brand h4 { color: var(--pv-text); }
 
-.pv-collection-head strong {
-  color: var(--pv-collection-title);
-}
+.pv-collection-head strong { color: var(--pv-collection-title); }
 
-.pv-thumb {
-  background: var(--pv-thumb-bg);
-}
+.pv-thumb { background: var(--pv-thumb-bg); }
 
 .pv-open {
   color: var(--pv-button-text);
@@ -705,9 +699,7 @@
   background: var(--pv-accent-dim);
 }
 
-.pv-card:hover {
-  border-color: var(--pv-hover-accent-border);
-}
+.pv-card:hover { border-color: var(--pv-hover-accent-border); }
 
     .tiny { font-size: 0.75rem; color: var(--muted); }
 
@@ -849,85 +841,127 @@
               </section>
 
               <section class="section-card">
-                <h3>Colores</h3>
-                <div class="section-help">Estos colores corresponden a la base visual que ya usa Aio Repo: fondo, superficies, bordes, texto y acento.</div>
-                <div class="grid-2">
-                  <div class="field">
-                    <label>Fondo principal</label>
-                    <div class="color-control">
-                      <input id="color-bg" type="color" />
-                      <input id="text-bg" type="text" placeholder="#050608" />
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label>Superficie</label>
-                    <div class="color-control">
-                      <input id="color-surface" type="color" />
-                      <input id="text-surface" type="text" placeholder="#0d1117" />
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label>Superficie 2</label>
-                    <div class="color-control">
-                      <input id="color-surface2" type="color" />
-                      <input id="text-surface2" type="text" placeholder="#111520" />
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label>Texto</label>
-                    <div class="color-control">
-                      <input id="color-text" type="color" />
-                      <input id="text-text" type="text" placeholder="#e5e7eb" />
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label>Color apagado</label>
-                    <div class="color-control">
-                      <input id="color-muted" type="color" />
-                      <input id="text-muted" type="text" placeholder="#6b7280" />
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label>Acento</label>
-                    <div class="color-control">
-                      <input id="color-accent" type="color" />
-                      <input id="text-accent" type="text" placeholder="#3b82f6" />
-                    </div>
-                  </div>
-                  <div class="grid-2">
-                  <div class="field">
-                    <label>Título principal del dirArc</label>
-                    <div class="color-control">
-                      <input id="color-title-text" type="color" />
-                      <input id="text-title-text" type="text" placeholder="#e5e7eb" />
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label>Título de contenedores / colecciones</label>
-                    <div class="color-control">
-                      <input id="color-collection-title" type="color" />
-                      <input id="text-collection-title" type="text" placeholder="#3b82f6" />
-                    </div>
-                  </div>
-                </div>
-                </div>
-                <div class="grid-2">
-                  <div class="field">
-                    <label for="text-border">Borde</label>
-                    <input id="text-border" type="text" placeholder="rgba(255,255,255,0.07)" />
-                    <div class="help">Puede ser rgba() para mantener transparencia fina.</div>
-                  </div>
-                  <div class="field">
-                    <label for="text-border2">Borde fuerte</label>
-                    <input id="text-border2" type="text" placeholder="rgba(255,255,255,0.12)" />
-                  </div>
-                  <div class="field" style="grid-column: 1 / -1;">
-                    <label for="text-accent-dim">Acento suave</label>
-                    <input id="text-accent-dim" type="text" placeholder="rgba(59,130,246,0.15)" />
-                    <div class="help">Se usa para pills activas, botones suaves y fondos de énfasis.</div>
-                  </div>
-                </div>
-              </section>
+  <h3>Colores base del tema</h3>
+  <div class="section-help">
+    Estos ajustes controlan el fondo general, las superficies de paneles y tarjetas, el texto principal, el texto secundario y el acento que se usa en filtros y botones.
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label>Fondo general (body)</label>
+      <div class="color-control">
+        <input id="color-bg" type="color" />
+        <input id="text-bg" type="text" placeholder="#050608" />
+      </div>
+      <div class="help">
+        Color de fondo de la página completa y base para el panel principal.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Superficie principal (paneles, tarjetas, header)</label>
+      <div class="color-control">
+        <input id="color-surface" type="color" />
+        <input id="text-surface" type="text" placeholder="#0d1117" />
+      </div>
+      <div class="help">
+        Se usa en el header, las tarjetas, la barra de búsqueda, orden y filtros.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Superficie secundaria (detalles, badges, fondos suaves)</label>
+      <div class="color-control">
+        <input id="color-surface2" type="color" />
+        <input id="text-surface2" type="text" placeholder="#111520" />
+      </div>
+      <div class="help">
+        Fondo de badges, recuadros suaves y placeholders de thumbnail.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Texto principal</label>
+      <div class="color-control">
+        <input id="color-text" type="color" />
+        <input id="text-text" type="text" placeholder="#e5e7eb" />
+      </div>
+      <div class="help">
+        Títulos principales y texto general en el header y las tarjetas.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Texto secundario (apagado)</label>
+      <div class="color-control">
+        <input id="color-muted" type="color" />
+        <input id="text-muted" type="text" placeholder="#6b7280" />
+      </div>
+      <div class="help">
+        Descripciones, metadatos, textos pequeños y contadores.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Acento (filtros y botones)</label>
+      <div class="color-control">
+        <input id="color-accent" type="color" />
+        <input id="text-accent" type="text" placeholder="#3b82f6" />
+      </div>
+      <div class="help">
+        Color del filtro activo y del botón “Abrir” en las tarjetas.
+      </div>
+    </div>
+
+    <div class="field">
+  <label>Títulos de tarjetas (cards)</label>
+  <div class="color-control">
+    <input id="color-title-text" type="color" />
+    <input id="text-title-text" type="text" placeholder="#e5e7eb" />
+  </div>
+  <div class="help">
+    Color de los títulos de cada tarjeta en las colecciones.
+  </div>
+</div>
+
+<div class="field">
+  <label>Títulos de colecciones / contenedores</label>
+  <div class="color-control">
+    <input id="color-collection-title" type="color" />
+    <input id="text-collection-title" type="text" placeholder="#3b82f6" />
+  </div>
+  <div class="help">
+    Color del título de cada grupo de tarjetas (cabecera de colección).
+  </div>
+</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label for="text-border">Borde base</label>
+      <input id="text-border" type="text" placeholder="rgba(255,255,255,0.07)" />
+      <div class="help">
+        Bordes de paneles y tarjetas en estado normal (puede ser rgba()).
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="text-border2">Borde fuerte / división</label>
+      <input id="text-border2" type="text" placeholder="rgba(255,255,255,0.12)" />
+      <div class="help">
+        Bordes más marcados, divisores y contornos destacados.
+      </div>
+    </div>
+
+    <div class="field" style="grid-column: 1 / -1;">
+      <label for="text-accent-dim">Acento suave (fondos de énfasis)</label>
+      <input id="text-accent-dim" type="text" placeholder="rgba(59,130,246,0.15)" />
+      <div class="help">
+        Fondo de filtro activo, botones suaves y chips con énfasis.
+      </div>
+    </div>
+  </div>
+</section>
 
               <section class="section-card">
                 <h3>Fondo</h3>
@@ -1428,12 +1462,12 @@
   els.previewFrame.style.setProperty('--pv-accent-dim', t.colors.accentDim);
 
   els.previewFrame.style.setProperty('--pv-title-strong', t.colors.titleText || t.colors.text);
-  els.previewFrame.style.setProperty('--pv-collection-title', t.colors.collectionTitle || t.colors.accent);
-  els.previewFrame.style.setProperty('--pv-thumb-bg', t.colors.surface2 || t.colors.surface);
-  els.previewFrame.style.setProperty('--pv-button-text', t.colors.accent || t.colors.text);
-  els.previewFrame.style.setProperty('--pv-footer-text', t.colors.muted || t.colors.text);
-  els.previewFrame.style.setProperty('--pv-accent-border', `color-mix(in srgb, ${t.colors.accent} 28%, transparent)`);
-  els.previewFrame.style.setProperty('--pv-hover-accent-border', `color-mix(in srgb, ${t.colors.accent} 40%, transparent)`);
+els.previewFrame.style.setProperty('--pv-collection-title', t.colors.collectionTitle || t.colors.accent);
+els.previewFrame.style.setProperty('--pv-thumb-bg', t.colors.surface2 || t.colors.surface);
+els.previewFrame.style.setProperty('--pv-button-text', t.colors.accent || t.colors.text);
+els.previewFrame.style.setProperty('--pv-footer-text', t.colors.muted || t.colors.text);
+els.previewFrame.style.setProperty('--pv-accent-border', `color-mix(in srgb, ${t.colors.accent} 28%, transparent)`);
+els.previewFrame.style.setProperty('--pv-hover-accent-border', `color-mix(in srgb, ${t.colors.accent} 40%, transparent)`);
 
   if (t.background.mode === 'image' && t.background.imageUrl) {
     els.previewFrame.style.backgroundImage = `url(${t.background.imageUrl})`;
