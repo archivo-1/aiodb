@@ -1138,10 +1138,8 @@
   <button class="app-dock-btn" data-app-id="local-preview" aria-label="Local Preview">
     <span class="app-dock-icon"><img src="thumbnails/dock_viewers.png" alt="Visor" class="dock-img"></span>
     <span class="app-dock-indicator"></span>
-    <span class="app-tooltip">Visor Aio</span>
+    <span class="app-tooltip">Visores Aio</span>
   </button>
-
-  <div class="dock-separator"></div>
 
   <button class="app-dock-btn" data-app-id="arc-editor" aria-label="ARC Editor">
     <span class="app-dock-icon"><img src="thumbnails/dock_editor.png" alt="Editor" class="dock-img"></span>
@@ -1155,16 +1153,18 @@
     <span class="app-tooltip">Asistente URL</span>
   </button>
 
+  <button class="app-dock-btn" data-app-id="theme-lab" aria-label="Theme Lab">
+  <span class="app-dock-icon"><img src="thumbnails/dock_theme.png" alt="Theme Lab" class="dock-img"></span>
+  <span class="app-dock-indicator"></span>
+  <span class="app-tooltip">Theme Lab</span>
+</button>
+
+  <div class="dock-separator"></div>
+
   <button class="app-dock-btn" data-app-id="quick-start" aria-label="Quick Start">
     <span class="app-dock-icon"><img src="thumbnails/dock_guia.png" alt="Guía" class="dock-img"></span>
     <span class="app-dock-indicator"></span>
     <span class="app-tooltip">Guía de inicio rápido</span>
-  </button>
-
-  <!-- Hidden future app -->
-  <button class="app-dock-btn is-hidden" data-app-id="theme-lab" aria-label="Theme Lab">
-    <span class="app-dock-icon"><img src="thumbnails/dock_theme.png" alt="Theme Lab" class="dock-img"></span>
-    <span class="app-tooltip">Theme Lab</span>
   </button>
 
 </div>
@@ -2648,13 +2648,13 @@ const appsRegistry = {
     title: 'Guía de inicio',
     icon: 'thumbnails/dock_guia.png',
     type: 'iframe',
-    src: 'https://archivo-1.github.io/aiodb/apps/theme-lab.html'
+    src: 'https://archivo-1.github.io/aiorepo.c/index.html?slugDirArc=aiorepo'
   },
   'theme-lab': {
     title: 'Theme Lab',
     icon: 'thumbnails/dock_theme.png',
-    type: 'hidden',
-    content: `<div class="app-placeholder"><h3>Theme Lab</h3><p>Herramienta futura oculta.</p></div>`
+    type: 'iframe',
+    src: 'https://archivo-1.github.io/aiodb/apps/theme-lab.html'
   }
 };
 
